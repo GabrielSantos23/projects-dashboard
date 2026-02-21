@@ -1,0 +1,133 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:ProjectDashboard.Avalonia.ViewModels"
+        xmlns:models="clr-namespace:ProjectDashboard.Shared.Models;assembly=ProjectDashboard.Shared"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="600"
+        x:Class="ProjectDashboard.Avalonia.Views.ScanModalView"
+        x:DataType="vm:ScanModalViewModel"
+        Title="Scan Folders"
+        Background="#1e1e20"
+        Foreground="#d4d4d8"
+        WindowStartupLocation="CenterOwner"
+        SizeToContent="Height"
+        Width="500"
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome">
+
+
+
+  <Grid RowDefinitions="Auto,*,Auto">
+    
+    <Border Grid.Row="0" BorderBrush="#2a2a2a" BorderThickness="0,0,0,1" Padding="24,20">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Background="#0088ff20">
+          <Path Width="20" Height="20" Stroke="#0088ff" StrokeThickness="1.5" Data="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/>
+        </Border>
+        <StackPanel Grid.Column="1" Margin="16,0,0,0">
+          <TextBlock Text="Scan Folders" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+          <TextBlock Text="Choose which folders to scan for git repositories" Classes="labelTiny" Margin="0,2,0,0"/>
+        </StackPanel>
+        <Button Grid.Column="2" Background="Transparent" Padding="8" x:Name="CloseBtn">
+          <Path Width="20" Height="20" Stroke="#8b8b90" StrokeThickness="2" Data="M6 18L18 6M6 6l12 12"/>
+        </Button>
+      </Grid>
+    </Border>
+
+    
+    <Border Grid.Row="1" Padding="24">
+      <StackPanel Spacing="16">
+        
+        <Grid ColumnDefinitions="*,Auto,Auto">
+          <TextBox Grid.Column="0" Classes="inputBox" Text="{Binding NewFolderPath}" Watermark="Enter folder path, e.g. D:\projects" x:Name="FolderPathInput"/>
+          <Button Grid.Column="1" Classes="actionBtn" Margin="8,0,0,0" x:Name="BrowseBtn">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Path Width="16" Height="16" Stroke="#a1a1aa" StrokeThickness="2" Data="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/>
+              <TextBlock Text="Browse" Foreground="#d4d4d8" FontSize="13"/>
+            </StackPanel>
+          </Button>
+          <Button Grid.Column="2" Classes="primaryBtn" Margin="8,0,0,0" x:Name="AddBtn" IsEnabled="{Binding NewFolderPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <Path Width="16" Height="16" Stroke="White" StrokeThickness="2" Data="M12 4.5v15m7.5-7.5h-15"/>
+              <TextBlock Text="Add"/>
+            </StackPanel>
+          </Button>
+        </Grid>
+
+        
+        <Border Background="#ff3b3010" BorderBrush="#ff3b3020" BorderThickness="1" CornerRadius="8" Padding="12" IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Path Width="16" Height="16" Stroke="#ff3b30" StrokeThickness="2" Data="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="#ff3b30" FontSize="12" FontWeight="Medium"/>
+          </StackPanel>
+        </Border>
+
+        
+        <ScrollViewer MaxHeight="256">
+          <ItemsControl ItemsSource="{Binding Folders}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="models:ScanFolder">
+                <Button Classes="folderItem" HorizontalAlignment="Stretch" PointerEntered="FolderItem_PointerEntered" PointerExited="FolderItem_PointerExited">
+                  <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Path Grid.Column="0" Width="16" Height="16" Stroke="#ffcc00" StrokeThickness="1.5" Data="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" Margin="0,0,12,0"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Path}" Foreground="#d4d4d8" FontSize="13" FontFamily="Consolas" TextTrimming="CharacterEllipsis"/>
+                    <Button Grid.Column="2" x:Name="RemoveBtn" Background="Transparent" Padding="4" IsVisible="False" PointerPressed="RemoveFolder_Click">
+                      <Path Width="16" Height="16" Stroke="#ff3b30" StrokeThickness="2" Data="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                    </Button>
+                  </Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+        
+        <Border Background="#0088ff10" BorderBrush="#0088ff20" BorderThickness="1" CornerRadius="8" Padding="12" IsVisible="{Binding IsScanning}">
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <Path Width="20" Height="20" Stroke="#0088ff" StrokeThickness="2" Data="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" RenderTransformOrigin="50%,50%">
+              <Path.RenderTransform>
+                <RotateTransform />
+              </Path.RenderTransform>
+              <Path.Styles>
+                <Style Selector="Path">
+                  <Style.Animations>
+                    <Animation Duration="0:0:1" IterationCount="Infinite">
+                      <KeyFrame Cue="0%">
+                        <Setter Property="(RotateTransform.Angle)" Value="0" />
+                      </KeyFrame>
+                      <KeyFrame Cue="100%">
+                        <Setter Property="(RotateTransform.Angle)" Value="360" />
+                      </KeyFrame>
+                    </Animation>
+                  </Style.Animations>
+                </Style>
+              </Path.Styles>
+            </Path>
+            <StackPanel>
+              <TextBlock Text="Scanning folders..." Foreground="#0088ff" FontSize="14" FontWeight="Medium"/>
+              <TextBlock Text="{Binding ScanProgressMessage}" Foreground="#0088ff" FontSize="12" Opacity="0.8" Margin="0,2,0,0"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </Border>
+
+    
+    <Border Grid.Row="2" Background="#16161880" BorderBrush="#2a2a2a" BorderThickness="0,1,0,0" Padding="24,16">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+        <TextBlock Grid.Column="0" Text="{Binding FolderCountText}" Foreground="#8b8b90" FontSize="12" VerticalAlignment="Center"/>
+        <Button Grid.Column="2" Classes="actionBtn" x:Name="CancelBtn">
+          <TextBlock Text="Cancel" Foreground="#d4d4d8" FontSize="13"/>
+        </Button>
+        <Button Grid.Column="3" Classes="primaryBtn" Margin="8,0,0,0" x:Name="StartScanBtn" IsEnabled="{Binding CanStartScan}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Path Width="16" Height="16" Stroke="White" StrokeThickness="2" Data="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+            <TextBlock Text="Start Scan"/>
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

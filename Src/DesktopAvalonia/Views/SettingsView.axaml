@@ -1,0 +1,106 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:ProjectDashboard.Avalonia.ViewModels"
+             xmlns:models="clr-namespace:ProjectDashboard.Shared.Models;assembly=ProjectDashboard.Shared"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="ProjectDashboard.Avalonia.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+
+
+  <ScrollViewer Background="#1a1a1a" Padding="24,24,24,32">
+    <StackPanel Spacing="24">
+      
+      
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+          <TextBlock Text="Settings" Foreground="#8b8b90" FontSize="13"/>
+          <TextBlock Text="/" Foreground="#8b8b90" FontSize="13"/>
+          <TextBlock Text="Application Settings" Foreground="#d4d4d8" FontSize="13"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+          <TextBox Classes="inputBox" Width="256" Watermark="Search settings..."/>
+          <Button Classes="primaryBtn" x:Name="SaveBtn">
+            <TextBlock Text="Save Changes"/>
+          </Button>
+        </StackPanel>
+      </Grid>
+
+      
+      <StackPanel Spacing="8">
+        <TextBlock Text="Application Settings" FontSize="24" FontWeight="SemiBold" Foreground="White"/>
+        <TextBlock Text="Manage how your dashboard interacts with your local filesystem and repositories." Foreground="#8b8b90" FontSize="13"/>
+      </StackPanel>
+
+      
+      <Border Classes="card" Padding="24">
+        <StackPanel Spacing="20">
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <Border Width="32" Height="32" CornerRadius="8" Background="#2a2a2a" BorderBrush="#3a3a3a" BorderThickness="1">
+              <Path Width="16" Height="16" Stroke="#0088ff" StrokeThickness="1.5" Data="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/>
+            </Border>
+            <TextBlock Text="Scan Configuration" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+          </StackPanel>
+
+          <StackPanel Spacing="8">
+            <TextBlock Classes="labelTiny" Text="SCAN FOLDERS"/>
+            
+            <ScrollViewer MaxHeight="192">
+              <ItemsControl ItemsSource="{Binding Folders}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="models:ScanFolder">
+                    <Button Classes="folderItem" HorizontalAlignment="Stretch" PointerEntered="FolderItem_PointerEntered" PointerExited="FolderItem_PointerExited">
+                      <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="{Binding Path}" Foreground="#d4d4d8" FontSize="13" FontFamily="Consolas" TextTrimming="CharacterEllipsis"/>
+                        <Button Grid.Column="1" x:Name="RemoveFolderBtn" Background="Transparent" IsVisible="False" PointerPressed="RemoveFolder_Click">
+                          <Path Width="16" Height="16" Stroke="#ff3b30" StrokeThickness="2" Data="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </Button>
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+
+            <Grid ColumnDefinitions="*,Auto,Auto">
+              <TextBox Grid.Column="0" Classes="inputBox" Text="{Binding NewFolderPath}" Watermark="Enter folder path..."/>
+              <Button Grid.Column="1" Classes="actionBtn" Margin="8,0,0,0" x:Name="BrowseBtn">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Path Width="16" Height="16" Stroke="#a1a1aa" StrokeThickness="2" Data="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                  <TextBlock Text="Browse" Foreground="#d4d4d8" FontSize="13"/>
+                </StackPanel>
+              </Button>
+              <Button Grid.Column="2" Classes="primaryBtn" Margin="8,0,0,0" x:Name="AddFolderBtn" IsEnabled="{Binding NewFolderPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                <TextBlock Text="Add"/>
+              </Button>
+            </Grid>
+
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="#ff3b30" FontSize="11" IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+            <TextBlock Classes="labelDesc" Text="The root directories where the dashboard will recursively search for .git projects."/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      
+      <Border Classes="card" Padding="24">
+        <StackPanel Spacing="20">
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <Border Width="32" Height="32" CornerRadius="8" Background="#2a2a2a" BorderBrush="#3a3a3a" BorderThickness="1">
+              <Path Width="16" Height="16" Stroke="#34c759" StrokeThickness="1.5" Data="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+            </Border>
+            <TextBlock Text="Integration" FontSize="16" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+          </StackPanel>
+
+          
+          <StackPanel Spacing="8">
+            <TextBlock Classes="labelTiny" Text="OPEN IN EDITOR"/>
+            <ComboBox Classes="dropDown" ItemsSource="{Binding EditorOptions}" SelectedItem="{Binding OpenInEditor, Mode=TwoWay}" HorizontalAlignment="Stretch" MaxWidth="300" HorizontalContentAlignment="Left"/>
+            <TextBlock Classes="labelDesc" Text="Default application used when clicking 'Open in Editor' for a project."/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

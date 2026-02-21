@@ -1,0 +1,147 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ProjectDashboard.Avalonia"
+        xmlns:views="clr-namespace:ProjectDashboard.Avalonia.Views"
+        xmlns:models="clr-namespace:ProjectDashboard.Shared.Models;assembly=ProjectDashboard.Shared"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        x:Class="ProjectDashboard.Avalonia.MainWindow"
+        Title="Projects Hub"
+        Background="#1a1a1a"
+        Foreground="#a1a1aa"
+        FontFamily="avares://ProjectDashboard.Avalonia/font#Satoshi, Inter, Arial, sans-serif"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        Width="1280" Height="800"
+        MinWidth="900" MinHeight="600"
+        x:DataType="local:MainWindow">
+
+
+
+    <Grid RowDefinitions="32, *">
+        
+        <Border Grid.Row="0" Background="#161616" PointerPressed="TitleBar_PointerPressed" DoubleTapped="TitleBar_DoubleTapped" BorderBrush="#2a2a2a" BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="Auto, *, Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" Margin="12,0,0,0">
+                    <Path Width="12" Height="12" Fill="#d4d4d8" Data="M19 3v18 M12 9 l3 3 -3 3 M5 3h18v18H5z"/>
+                    <TextBlock Text="Projects Hub" Foreground="#a1a1aa" FontSize="12" VerticalAlignment="Center" FontWeight="Medium"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Width="46" Height="32" Classes="titlebarBtn" Click="Minimize_Click" Background="Transparent" BorderThickness="0">
+                        <Path Width="10" Height="1" Stroke="#d4d4d8" StrokeThickness="1" Data="M0 0h10" Stretch="None"/>
+                    </Button>
+                    <Button Width="46" Height="32" Classes="titlebarBtn" Click="Maximize_Click" Background="Transparent" BorderThickness="0">
+                        <Border Width="10" Height="10" BorderBrush="#d4d4d8" BorderThickness="1.5" CornerRadius="1"/>
+                    </Button>
+                    <Button Width="46" Height="32" Classes="titlebarCloseBtn" Click="Close_Click" Background="Transparent" BorderThickness="0">
+                        <Path Width="10" Height="10" Stroke="#d4d4d8" StrokeThickness="1.5" Data="M0 0l10 10M0 10L10 0" Stretch="None"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" VerticalAlignment="Stretch">
+            
+            <Border x:Name="SidebarBorder" Width="220" Grid.Column="0" Background="#161616" BorderBrush="#2a2a2a" BorderThickness="0,0,1,0">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    
+                    
+                    <Button x:Name="BrandButton" Grid.Row="0" Padding="16,20" Background="Transparent" Classes="sidebarItem" Click="SidebarToggle_Click">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <StackPanel x:Name="BrandPanel" Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                                <StackPanel Orientation="Horizontal" Spacing="3" VerticalAlignment="Center">
+                                    <Ellipse Width="8" Height="8" Fill="White" Opacity="0.9"/>
+                                    <Ellipse Width="8" Height="8" Fill="White" Opacity="0.6"/>
+                                    <Ellipse Width="8" Height="8" Fill="White" Opacity="0.3"/>
+                                </StackPanel>
+                                <TextBlock x:Name="BrandText" Text="Projects Hub" Foreground="#d4d4d8" FontWeight="Medium" FontSize="13" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
+                            <Path x:Name="SidebarToggleIcon" Grid.Column="2" Classes="icon" Stroke="#d4d4d8" Opacity="0.4" Data="M19 3v18 M12 9 l3 3 -3 3 M5 3h18v18H5z" Width="14"/>
+                        </Grid>
+                    </Button>
+
+                
+                <ScrollViewer Grid.Row="1" Padding="12,10">
+                    <StackPanel Spacing="24">
+                        
+                        
+                        <StackPanel Spacing="2">
+                            <TextBlock x:Name="GeneralText" Text="General" Foreground="#6b6b70" FontSize="11" Margin="8,0,0,8"/>
+                            
+                            <Button x:Name="NavDashboard" Classes="sidebarItem active" Click="Dashboard_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Path Classes="icon" Data="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                                    <TextBlock x:Name="NavDashboardText" Text="Dashboard" VerticalAlignment="Center" FontSize="12.5"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <Button x:Name="NavProjects" Classes="sidebarItem" Click="Projects_Click">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                                        <Path Classes="icon" Data="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                        <TextBlock x:Name="NavProjectsText" Text="All Projects" VerticalAlignment="Center" FontSize="12.5"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="NavProjectsBadge" Grid.Column="1" Text="{Binding TotalProjects}" Foreground="#6b6b70" FontSize="10" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Button>
+
+                            <Button x:Name="NavActivity" Classes="sidebarItem" Click="Activity_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Path Classes="icon" Data="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    <TextBlock x:Name="NavActivityText" Text="Recent Activity" VerticalAlignment="Center" FontSize="12.5"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        
+                        <StackPanel Spacing="2">
+                            <TextBlock x:Name="FavoritesText" Text="Favorites" Foreground="#6b6b70" FontSize="11" Margin="8,0,0,8"/>
+                            <ItemsControl x:Name="FavoritesList" ItemsSource="{Binding PinnedProjects}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:Project">
+                                        <Button Classes="sidebarItem" Click="Favorite_Click" Tag="{Binding Id}">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <Border Width="16" Height="16" CornerRadius="8">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                                            <GradientStop Color="#6366f1" Offset="0"/>
+                                                            <GradientStop Color="#a855f7" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                    <TextBlock Text="{Binding Name, Converter={StaticResource StringInitialConverter}}" FontSize="8" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="12.5" TextTrimming="CharacterEllipsis" MaxWidth="140"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock x:Name="NoFavoritesText" Text="No favorites yet" Foreground="#5b5b60" FontStyle="Italic" FontSize="11" Margin="8,0,0,0" IsVisible="{Binding !HasPinnedProjects}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                
+                <Border Grid.Row="2" BorderBrush="#2a2a2a" BorderThickness="0,1,0,0" Padding="12">
+                    <Button x:Name="NavSettings" Classes="sidebarItem" Click="Settings_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Classes="icon" Data="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <TextBlock x:Name="NavSettingsText" Text="Settings" VerticalAlignment="Center" FontSize="12.5"/>
+                        </StackPanel>
+                    </Button>
+                </Border>
+            </Grid>
+        </Border>
+
+        
+        <ScrollViewer Grid.Column="1" x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Background="#1a1a1a">
+            <ContentControl x:Name="MainContentHost"/>
+        </ScrollViewer>
+    </Grid>
+    </Grid>
+</Window>

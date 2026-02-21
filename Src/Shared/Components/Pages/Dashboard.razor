@@ -1,0 +1,305 @@
+@page "/"
+@layout ProjectDashboard.Shared.Components.Layout.DashboardLayout
+@using Microsoft.EntityFrameworkCore
+@using ProjectDashboard.Shared.Data
+@using ProjectDashboard.Shared.Models
+@using ProjectDashboard.Shared.Services
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject IConfiguration Config
+@inject NavigationManager Nav
+
+<div class="min-h-screen text-[#d4d4d8] p-6 lg:p-8 font-sans" style="background-color: #1a1a1a;">
+    
+    
+    <div class="flex items-center justify-between mb-8 text-[13px]">
+        <div class="flex items-center text-[#8b8b90] gap-2">
+            <span>General</span>
+            <span>/</span>
+            <span class="text-[#d4d4d8]">All Projects</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button class="w-8 h-8 rounded-md bg-[#2a2a2a] border border-[#3a3a3a] flex items-center justify-center hover:bg-[#3a3a3a] transition-colors">
+                <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </button>
+            <button class="px-3 h-8 rounded-md bg-[#2a2a2a] border border-[#3a3a3a] flex items-center gap-2 hover:bg-[#3a3a3a] transition-colors" @onclick="HandleRefresh" disabled="@isRefreshing">
+                <svg class="w-4 h-4 opacity-70 @(isRefreshing ? "animate-spin text-[#00E5FF]" : "")" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span class="opacity-90">Refresh</span>
+            </button>
+            <button class="px-3 h-8 rounded-md bg-[#2a2a2a] border border-[#3a3a3a] flex items-center gap-2 hover:bg-[#3a3a3a] transition-colors">
+                <svg class="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                <span class="opacity-90">Filter</span>
+            </button>
+            <button class="px-4 h-8 rounded-md bg-[#0088ff] hover:bg-[#0077ee] text-white flex items-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(0,136,255,0.3)] font-medium" @onclick="OpenScanModal">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>Scan Projects</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-xl font-medium tracking-wide text-white">Project Dashboard</h1>
+    </div>
+
+    
+    <div class="grid grid-cols-4 gap-4 mb-4">
+        <div class="bg-[#1e1e20] border border-[#2a2a2a] rounded-xl p-4 flex flex-col justify-between h-28 hover:bg-[#222224] transition-colors cursor-default">
+            <div class="flex items-center gap-2 text-[11px] text-[#8b8b90] font-medium tracking-wide">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                TOTAL PROJECTS
+            </div>
+            <div class="text-[28px] font-medium text-white tracking-tight">@totalCount</div>
+            <div class="flex items-center justify-between text-[11px] font-medium">
+                <span class="text-[#8b8b90]">last 30 days</span>
+                <span class="text-[#ff3b30]">-4.2%</span>
+            </div>
+        </div>
+
+        <div class="bg-[#1e1e20] border border-[#2a2a2a] rounded-xl p-4 flex flex-col justify-between h-28 hover:bg-[#222224] transition-colors cursor-default">
+            <div class="flex items-center gap-2 text-[11px] text-[#8b8b90] font-medium tracking-wide">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                ACTIVE THIS WEEK
+            </div>
+            <div class="text-[28px] font-medium text-white tracking-tight">@activeCount</div>
+            <div class="flex items-center justify-between text-[11px] font-medium">
+                <span class="text-[#8b8b90]">last 30 days</span>
+                <span class="text-[#ff3b30]">-1.5%</span>
+            </div>
+        </div>
+
+        <div class="bg-[#1e1e20] border border-[#2a2a2a] rounded-xl p-4 flex flex-col justify-between h-28 hover:bg-[#222224] transition-colors cursor-default">
+            <div class="flex items-center gap-2 text-[11px] text-[#8b8b90] font-medium tracking-wide">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                STALLED
+            </div>
+            <div class="text-[28px] font-medium text-white tracking-tight">@stalledCount</div>
+            <div class="flex items-center justify-between text-[11px] font-medium">
+                <span class="text-[#8b8b90]">last 30 days</span>
+                <span class="text-[#34c759]">+12%</span>
+            </div>
+        </div>
+
+        <div class="bg-[#1e1e20] border border-[#2a2a2a] rounded-xl p-4 flex flex-col justify-between h-28 hover:bg-[#222224] transition-colors cursor-default">
+            <div class="flex items-center gap-2 text-[11px] text-[#8b8b90] font-medium tracking-wide">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                ARCHIVED
+            </div>
+            <div class="text-[28px] font-medium text-white tracking-tight">@archivedCount</div>
+            <div class="flex items-center justify-between text-[11px] font-medium">
+                <span class="text-[#8b8b90]">last 30 days</span>
+                <span class="text-[#34c759]">+2%</span>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="grid grid-cols-1 gap-4">
+
+        
+        <div class="bg-[#1e1e20] border border-[#2a2a2a] rounded-xl p-5 flex flex-col hover:border-[#3a3a3a] transition-colors">
+            <div class="mb-5">
+                <div class="text-[11px] text-[#8b8b90] font-medium mb-1">Top Technologies</div>
+                <div class="text-xl font-medium text-white flex items-center gap-2">
+                    #1 @(topTechs.FirstOrDefault()?.Name ?? "N/A")
+                </div>
+            </div>
+
+            
+            <div class="flex h-1.5 w-full rounded-full overflow-hidden mb-6 gap-1">
+                @foreach(var (tech, index) in topTechs.Select((t, i) => (t, i)))
+                {
+                    var colors = new[] { "#0088ff", "#ff3b30", "#ffcc00", "#34c759", "#00E5FF" };
+                    var color = colors[index % colors.Length];
+                    var flexBasis = (double)tech.Count / Math.Max(1, topTechs.Sum(t => t.Count)) * 100;
+                    <div style="flex-basis: @(flexBasis)%; background-color: @color;" class="h-full rounded-full"></div>
+                }
+            </div>
+
+            <div class="flex gap-4 mb-4 text-[10px] font-bold text-[#8b8b90]">
+                @foreach(var (tech, index) in topTechs.Select((t, i) => (t, i)))
+                {
+                    var colors = new[] { "#0088ff", "#ff3b30", "#ffcc00", "#34c759", "#00E5FF" };
+                    <div class="flex items-center gap-1.5 group cursor-default">
+                        <div class="w-1.5 h-1.5 rounded-full group-hover:scale-150 transition-transform" style="background-color: @colors[index % colors.Length];"></div>
+                        <span class="text-[#d4d4d8]">@tech.Name</span>
+                    </div>
+                }
+            </div>
+
+            
+            <table class="w-full text-left mt-2">
+                <thead>
+                    <tr class="text-[10px] text-[#5b5b60] font-bold border-b border-[#2a2a2a]">
+                        <th class="pb-2 font-medium">Technology</th>
+                        <th class="pb-2 font-medium text-right">Share</th>
+                        <th class="pb-2 font-medium text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="text-[12px]">
+                    @foreach(var (tech, index) in topTechs.Select((t, i) => (t, i)))
+                    {
+                        var colors = new[] { "#0088ff", "#ff3b30", "#ffcc00", "#34c759", "#00E5FF" };
+                        var color = colors[index % colors.Length];
+                        var share = ((double)tech.Count / Math.Max(1, totalTechCount) * 100).ToString("F1") + "%";
+                        <tr class="border-b border-[#2a2a2a]/50 hover:bg-white/5 transition-colors">
+                            <td class="py-2.5 flex items-center gap-2">
+                                <div class="w-4 h-4 rounded text-white flex items-center justify-center text-[8px] font-bold" style="background-color: @color;">@tech.Name.Substring(0,1).ToUpper()</div>
+                                <span>@tech.Name</span>
+                            </td>
+                            <td class="py-2.5 text-right font-medium">@share</td>
+                            <td class="py-2.5 text-right text-white">@tech.Count</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    
+    <div class="mt-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-medium text-white">All Projects</h2>
+            <div class="relative">
+                <svg class="absolute left-3 top-2.5 w-3.5 h-3.5 text-[#5b5b60]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5-5m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" placeholder="Search by name..." @bind="searchQuery" @bind:event="oninput"
+                       class="w-64 bg-[#1e1e20] border border-[#2a2a2a] rounded-md text-[13px] text-white py-1.5 pl-9 pr-3 focus:outline-none focus:border-[#0088ff] transition-colors" />
+            </div>
+        </div>
+        
+        <div class="bg-[#1e1e20] border border-[#2a2a2a] rounded-xl overflow-hidden">
+            <table class="w-full text-left whitespace-nowrap">
+                <thead>
+                    <tr class="text-[10px] font-bold text-[#6b6b70] uppercase tracking-wider border-b border-[#2a2a2a] bg-[#1a1a1c]">
+                        <th class="px-5 py-3">Project</th>
+                        <th class="px-5 py-3">Status</th>
+                        <th class="px-5 py-3">Last Activity</th>
+                    </tr>
+                </thead>
+                <tbody class="text-[13px]">
+                    @foreach (var p in filteredProjects.Take(8))
+                    {
+                        <tr class="border-b border-[#2a2a2a]/50 hover:bg-white/5 transition-colors cursor-pointer" @onclick="() => NavigateToProject(p.Id)">
+                            <td class="px-5 py-3.5 font-medium text-[#d4d4d8]">@p.Name</td>
+                            <td class="px-5 py-3.5">
+                                <span class="@GetStatusClasses(p.Status) inline-flex items-center px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide">
+                                    <span class="w-1.5 h-1.5 rounded-full mr-1.5" style="background-color: currentColor;"></span>
+                                    @p.Status
+                                </span>
+                            </td>
+                            <td class="px-5 py-3.5 text-[#8b8b90]">@p.TimeAgo</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<ProjectDashboard.Shared.Components.ScanModal 
+    IsVisible="@showScanModal" 
+    OnClose="CloseScanModal" 
+    OnScanComplete="OnScanComplete" />
+
+@code {
+    private List<Project> projects = new();
+    private List<Project> recentProjects = new();
+    
+    private int totalCount;
+    private int activeCount;
+    private int stalledCount;
+    private int archivedCount;
+    
+    private string searchQuery = "";
+    private bool showScanModal;
+
+    private class TechStat
+    {
+        public string Name { get; set; } = "";
+        public int Count { get; set; }
+    }
+    
+    private List<TechStat> topTechs = new();
+    private int totalTechCount = 0;
+
+    private IEnumerable<Project> filteredProjects => projects
+        .Where(p =>
+            (string.IsNullOrEmpty(searchQuery) ||
+             p.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+             p.Path.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
+        );
+
+    private bool isRefreshing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProjects();
+    }
+
+    private async Task HandleRefresh()
+    {
+        isRefreshing = true;
+        StateHasChanged();
+        await Task.Delay(400); 
+        await LoadProjects();
+        isRefreshing = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadProjects()
+    {
+        using var db = await DbFactory.CreateDbContextAsync();
+        projects = await db.Projects
+            .OrderByDescending(p => p.LastCommit)
+            .ToListAsync();
+
+        totalCount = projects.Count;
+        recentProjects = projects.Take(12).ToList();
+        
+        var now = DateTime.UtcNow;
+        activeCount = projects.Count(p => p.Status == "Active" || (p.LastCommit.HasValue && (now - p.LastCommit.Value).TotalDays <= 7));
+        stalledCount = projects.Count(p => p.Status == "Stalled" || (p.LastCommit.HasValue && (now - p.LastCommit.Value).TotalDays > 30));
+        archivedCount = projects.Count(p => p.Status == "Archived");
+
+        var techGroups = projects
+            .SelectMany(p => p.TechPills)
+            .GroupBy(t => t)
+            .Select(g => new TechStat { Name = g.Key, Count = g.Count() })
+            .OrderByDescending(x => x.Count)
+            .ToList();
+            
+        topTechs = techGroups.Take(5).ToList();
+        totalTechCount = techGroups.Sum(x => x.Count);
+    }
+
+    private void OpenScanModal()
+    {
+        showScanModal = true;
+    }
+
+    private void CloseScanModal()
+    {
+        showScanModal = false;
+    }
+
+    private async Task OnScanComplete()
+    {
+        showScanModal = false;
+        await LoadProjects();
+        StateHasChanged();
+    }
+
+    private void NavigateToProject(int id)
+    {
+        Nav.NavigateTo("/project/" + id);
+    }
+
+    private string GetStatusClasses(string status) => status switch
+    {
+        "Active" => "text-[#34c759] bg-[#34c759]/10",
+        "Recent" => "text-[#0088ff] bg-[#0088ff]/10",
+        "Stalled" => "text-[#ffcc00] bg-[#ffcc00]/10",
+        "Archived" => "text-[#8b8b90] bg-[#8b8b90]/10",
+        _ => "text-[#8b8b90] bg-[#8b8b90]/10"
+    };
+}
+
+

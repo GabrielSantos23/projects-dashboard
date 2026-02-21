@@ -1,0 +1,21 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:ProjectDashboard.Avalonia.Converters"
+             x:Class="ProjectDashboard.Avalonia.App"
+             RequestedThemeVariant="Dark">
+
+    <Application.Resources>
+        <converters:StatusColorConverter x:Key="StatusColorConverter"/>
+        <converters:StatusBgColorConverter x:Key="StatusBgConverter"/>
+        <converters:TechColorConverter x:Key="TechColorConverter"/>
+        <converters:StringInitialConverter x:Key="StringInitialConverter"/>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://ProjectDashboard.Avalonia/Styles/AppStyles.axaml" />
+        <Style Selector="Path">
+            <Setter Property="Stretch" Value="Uniform"/>
+        </Style>
+    </Application.Styles>
+</Application>

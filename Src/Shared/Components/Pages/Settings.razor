@@ -1,0 +1,288 @@
+@page "/settings"
+@using Microsoft.JSInterop
+@using Microsoft.EntityFrameworkCore
+@using ProjectDashboard.Shared.Data
+@using ProjectDashboard.Shared.Models
+@using ProjectDashboard.Shared.Services
+@inject IJSRuntime JSRuntime
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject IFolderPickerService FolderPicker
+
+<div class="min-h-screen text-[#d4d4d8] p-6 lg:p-8 font-sans" style="background-color: #1a1a1a;">
+    
+    
+    <div class="flex items-center justify-between mb-8 text-[13px]">
+        <div class="flex items-center text-[#8b8b90] gap-2">
+            <span>Settings</span>
+            <span>/</span>
+            <span class="text-[#d4d4d8]">Application Settings</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative">
+                <svg class="absolute left-3 top-2.5 w-3.5 h-3.5 text-[#5b5b60]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5-5m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" placeholder="Search settings..."
+                       class="w-64 bg-[#161618] border border-[#2a2a2a] rounded-md text-[13px] text-white py-1.5 pl-9 pr-3 focus:outline-none focus:border-[#0088ff] transition-colors shadow-sm" />
+            </div>
+            <button @onclick="SaveChanges" class="px-4 h-8 rounded-md bg-[#0088ff] hover:bg-[#0077ee] text-white flex items-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(0,136,255,0.3)] font-medium">
+                Save Changes
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="mb-8">
+        <h1 class="text-2xl font-semibold tracking-wide text-white mb-2">Application Settings</h1>
+        <p class="text-[13px] text-[#8b8b90]">Manage how your dashboard interacts with your local filesystem and repositories.</p>
+    </div>
+
+    
+    <div class="bg-[#1e1e20] border border-[#2a2a2a] rounded-xl p-6 mb-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-8 h-8 rounded-lg bg-[#2a2a2a] border border-[#3a3a3a] flex items-center justify-center text-[#0088ff] shadow-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                </svg>
+            </div>
+            <h2 class="text-base font-semibold text-white">Scan Configuration</h2>
+        </div>
+
+        <div class="mb-8">
+            <label class="block text-[11px] font-bold text-[#d4d4d8] tracking-wider mb-2">SCAN FOLDERS</label>
+            
+            <div class="space-y-2 mb-3 max-h-48 overflow-y-auto custom-scrollbar">
+                @if (!folders.Any())
+                {
+                    <div class="text-[12px] text-[#5b5b60] italic py-2">No scan folders added.</div>
+                }
+                else
+                {
+                    @foreach (var folder in folders)
+                    {
+                        <div class="flex items-center justify-between bg-[#161618] border border-[#2a2a2a] rounded-md px-3 py-2 group hover:border-[#3a3a3a] transition-colors">
+                            <span class="text-[13px] text-[#d4d4d8] font-mono truncate mr-4">@folder.Path</span>
+                            <button @onclick="() => RemoveFolder(folder)" class="text-[#5b5b60] hover:text-[#ff3b30] opacity-0 group-hover:opacity-100 transition-all">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    }
+                }
+            </div>
+
+            <div class="flex gap-2">
+                <input type="text" @bind="newFolderPath" @bind:event="oninput" placeholder="Enter folder path..." class="flex-1 bg-[#161618] border border-[#2a2a2a] rounded-md text-[13px] text-[#d4d4d8] py-2 px-3 focus:outline-none focus:border-[#0088ff] transition-colors" />
+                @if (FolderPicker.IsSupported)
+                {
+                    <button @onclick="BrowseFolder" class="px-4 py-2 bg-[#2a2a2a] border border-[#3a3a3a] text-[#d4d4d8] text-[13px] font-medium rounded-md hover:bg-[#3a3a3a] transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                        Browse
+                    </button>
+                }
+                <button @onclick="AddFolder" disabled="@(string.IsNullOrWhiteSpace(newFolderPath))" class="px-4 py-2 bg-[#0088ff] hover:bg-[#0077ee] text-white text-[13px] font-medium rounded-md transition-colors disabled:opacity-50">
+                    Add
+                </button>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <p class="text-[11px] text-[#ff3b30] mt-2">@errorMessage</p>
+            }
+            <p class="text-[11px] text-[#5b5b60] mt-2">The root directories where the dashboard will recursively search for .git projects.</p>
+        </div>
+
+    </div>
+
+    
+    <div class="bg-[#1e1e20] border border-[#2a2a2a] rounded-xl p-6 mb-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-6">
+             <div class="w-8 h-8 rounded-lg bg-[#2a2a2a] border border-[#3a3a3a] flex items-center justify-center text-[#34c759] shadow-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+            </div>
+            <h2 class="text-base font-semibold text-white">Integration</h2>
+        </div>
+
+        <div class="grid grid-cols-2 gap-12 items-start">
+            <div>
+                <label class="block text-[11px] font-bold text-[#d4d4d8] tracking-wider mb-2">OPEN_IN_EDITOR</label>
+                <div class="relative">
+                    <select @bind="openInEditor" class="w-full bg-[#161618] border border-[#2a2a2a] rounded-md text-[13px] text-[#d4d4d8] py-2 pl-3 pr-10 appearance-none focus:outline-none focus:border-[#0088ff] transition-colors cursor-pointer">
+                        <option value="Cursor">Cursor</option>
+                        <option value="VS Code">VS Code</option>
+                        <option value="Rider">Rider</option>
+                        <option value="Zed">Zed</option>
+                        <option value="Antigravity">Antigravity</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-[#5b5b60]">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                </div>
+                <p class="text-[11px] text-[#5b5b60] mt-2">Default application used when clicking 'Open in Editor' for a project.</p>
+            </div>
+
+            <div class="flex items-center justify-between border-l border-[#2a2a2a] pl-8 py-2">
+                <div>
+                    <h3 class="text-[13px] font-semibold text-white mb-0.5">File System Watcher</h3>
+                    <p class="text-[11px] text-[#8b8b90]">Auto-refresh on changes</p>
+                </div>
+                
+                <button @onclick="ToggleWatcher" class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors @(watcherEnabled ? "bg-[#0088ff]" : "bg-[#3a3a3a]") focus:outline-none">
+                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm @(watcherEnabled ? "translate-x-4" : "translate-x-0.5")"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="bg-[#1e1e20] border border-[#2a2a2a] rounded-xl p-6 mb-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-6">
+             <div class="w-8 h-8 rounded-lg bg-[#2a2a2a] border border-[#3a3a3a] flex items-center justify-center text-[#ffcc00] shadow-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+            </div>
+            <h2 class="text-base font-semibold text-white">Appearance</h2>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+            <button @onclick="() => SetTheme(0)" class="flex items-center gap-3 p-4 rounded-lg border text-left transition-colors @(selectedTheme == 0 ? "border-[#0088ff] bg-[#1e1e20] text-white" : "border-[#2a2a2a] bg-[#161618] text-[#8b8b90] hover:border-[#3a3a3a]")">
+                <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span class="text-[13px] font-medium">Light Mode</span>
+            </button>
+            <button @onclick="() => SetTheme(1)" class="flex items-center gap-3 p-4 rounded-lg border text-left transition-colors @(selectedTheme == 1 ? "border-[#0088ff] bg-[#1a1a1c] text-white shadow-[0_0_15px_rgba(0,136,255,0.1)]" : "border-[#2a2a2a] bg-[#161618] text-[#8b8b90] hover:border-[#3a3a3a]")">
+                <svg class="w-4 h-4 text-[#0088ff]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <span class="text-[13px] font-medium">Dark Mode</span>
+            </button>
+            <button @onclick="() => SetTheme(2)" class="flex items-center gap-3 p-4 rounded-lg border text-left transition-colors @(selectedTheme == 2 ? "border-[#0088ff] bg-[#1e1e20] text-white" : "border-[#2a2a2a] bg-[#161618] text-[#8b8b90] hover:border-[#3a3a3a]")">
+                <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="text-[13px] font-medium">System Default</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ScanFolder> folders = new();
+    private string newFolderPath = "";
+    private string errorMessage = "";
+    
+    private string openInEditor = "Cursor";
+    private bool watcherEnabled = true;
+    
+    
+    private int selectedTheme = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFolders();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try 
+            {
+                var val = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "openInEditor");
+                if (!string.IsNullOrEmpty(val)) 
+                {
+                    openInEditor = val;
+                    StateHasChanged();
+                }
+            } catch {}
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        try 
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "openInEditor", openInEditor);
+        } catch {}
+    }
+
+    private async Task LoadFolders()
+    {
+        using var db = await DbFactory.CreateDbContextAsync();
+        folders = await db.ScanFolders.OrderBy(f => f.CreatedAt).ToListAsync();
+    }
+
+    private async Task AddFolder()
+    {
+        errorMessage = "";
+        var path = newFolderPath.Trim();
+
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        if (!Directory.Exists(path))
+        {
+            errorMessage = $"Folder does not exist: {path}";
+            return;
+        }
+
+        if (folders.Any(f => f.Path.Equals(path, StringComparison.OrdinalIgnoreCase)))
+        {
+            errorMessage = "This folder is already in the list.";
+            return;
+        }
+
+        using var db = await DbFactory.CreateDbContextAsync();
+        var folder = new ScanFolder { Path = path };
+        db.ScanFolders.Add(folder);
+        await db.SaveChangesAsync();
+
+        newFolderPath = "";
+        await LoadFolders();
+    }
+
+    private async Task RemoveFolder(ScanFolder folder)
+    {
+        using var db = await DbFactory.CreateDbContextAsync();
+        var entity = await db.ScanFolders.FindAsync(folder.Id);
+        if (entity != null)
+        {
+            db.ScanFolders.Remove(entity);
+            await db.SaveChangesAsync();
+        }
+        await LoadFolders();
+    }
+
+    private async Task BrowseFolder()
+    {
+        errorMessage = "";
+        try
+        {
+            var path = await FolderPicker.PickFolderAsync();
+            if (!string.IsNullOrEmpty(path))
+            {
+                newFolderPath = path;
+                await AddFolder();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to pick folder: {ex.Message}";
+        }
+    }
+
+    private void ToggleWatcher()
+    {
+        watcherEnabled = !watcherEnabled;
+    }
+
+    private void SetTheme(int themeId)
+    {
+        selectedTheme = themeId;
+        
+    }
+}

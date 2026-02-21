@@ -1,0 +1,184 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:ProjectDashboard.Avalonia.ViewModels"
+             xmlns:models="clr-namespace:ProjectDashboard.Shared.Models;assembly=ProjectDashboard.Shared"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="ProjectDashboard.Avalonia.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel"
+             Background="#1a1a1a">
+
+
+
+  <StackPanel Spacing="24" Margin="24,24,24,32">
+      
+      
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+          <TextBlock Text="General" Foreground="#8b8b90" FontSize="13"/>
+          <TextBlock Text="/" Foreground="#8b8b90" FontSize="13"/>
+          <TextBlock Text="Dashboard" Foreground="#d4d4d8" FontSize="13"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+          <Button Classes="actionBtn" Command="{Binding RefreshCommand}" IsEnabled="{Binding !IsRefreshing}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Path Width="12" Height="12" Stroke="#a1a1aa" StrokeThickness="1" Data="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" Classes.spin="{Binding IsRefreshing}" RenderTransformOrigin="50%,50%">
+                <Path.RenderTransform>
+                  <RotateTransform />
+                </Path.RenderTransform>
+              </Path>
+              <TextBlock Text="Refresh" Foreground="#d4d4d8" FontSize="13"/>
+            </StackPanel>
+          </Button>
+          <Button Classes="actionBtn">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Path Width="12" Height="12" Stroke="#a1a1aa" StrokeThickness="1" Data="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+              <TextBlock Text="Filter" Foreground="#d4d4d8" FontSize="13"/>
+            </StackPanel>
+          </Button>
+          <Button Classes="primaryBtn" x:Name="ScanProjectsBtn" Click="ScanBtn_Click">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <Path Width="12" Height="12" Stroke="White" StrokeThickness="1" Data="M12 4v16m8-8H4"/>
+              <TextBlock Text="Scan Projects"/>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Grid>
+
+      
+      <TextBlock Text="Project Dashboard" FontSize="20" FontWeight="Medium" Foreground="White"/>
+
+      
+      <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="16">
+        
+        <Border Grid.Column="0" Classes="card" Padding="16" Height="112" CornerRadius="12">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="labelTiny" Text="TOTAL PROJECTS"/>
+            <TextBlock Text="{Binding TotalCount}" FontSize="28" FontWeight="Medium" Foreground="White"/>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="labelTiny" Text="last 30 days"/>
+              <TextBlock Grid.Column="1" Text="-4.2%" Foreground="#ff3b30" FontSize="11" FontWeight="Medium" HorizontalAlignment="Right"/>
+            </Grid>
+          </StackPanel>
+        </Border>
+        
+        <Border Grid.Column="1" Classes="card" Padding="16" Height="112" CornerRadius="12">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="labelTiny" Text="ACTIVE THIS WEEK"/>
+            <TextBlock Text="{Binding ActiveCount}" FontSize="28" FontWeight="Medium" Foreground="#00a8ff"/>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="labelTiny" Text="last 30 days"/>
+              <TextBlock Grid.Column="1" Text="-1.5%" Foreground="#ff3b30" FontSize="11" FontWeight="Medium" HorizontalAlignment="Right"/>
+            </Grid>
+          </StackPanel>
+        </Border>
+        
+        <Border Grid.Column="2" Classes="card" Padding="16" Height="112" CornerRadius="12">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="labelTiny" Text="STALLED"/>
+            <TextBlock Text="{Binding StalledCount}" FontSize="28" FontWeight="Medium" Foreground="#ff3b30"/>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="labelTiny" Text="last 30 days"/>
+              <TextBlock Grid.Column="1" Text="+12%" Foreground="#34c759" FontSize="11" FontWeight="Medium" HorizontalAlignment="Right"/>
+            </Grid>
+          </StackPanel>
+        </Border>
+        
+        <Border Grid.Column="3" Classes="card" Padding="16" Height="112" CornerRadius="12">
+          <StackPanel Spacing="4">
+            <TextBlock Classes="labelTiny" Text="ARCHIVED"/>
+            <TextBlock Text="{Binding ArchivedCount}" FontSize="28" FontWeight="Medium" Foreground="#0088ff"/>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="labelTiny" Text="last 30 days"/>
+              <TextBlock Grid.Column="1" Text="+2%" Foreground="#34c759" FontSize="11" FontWeight="Medium" HorizontalAlignment="Right"/>
+            </Grid>
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      
+      <Border Classes="card" Padding="20" CornerRadius="12">
+        <StackPanel Spacing="16">
+          <TextBlock Classes="labelTiny" Text="Top Technologies"/>
+          <TextBlock FontSize="20" FontWeight="Medium" Foreground="White" Text="{Binding TopTechName}"/>
+          
+          
+          <Grid ColumnDefinitions="*" Height="6">
+            <Border Background="#2a2a2a" CornerRadius="3"/>
+            <Border ClipToBounds="True" CornerRadius="3" HorizontalAlignment="Stretch">
+                <Grid x:Name="TechBarContainer"/>
+            </Border>
+          </Grid>
+
+          
+          <Grid ColumnDefinitions="*,Auto,Auto">
+            <TextBlock Grid.Column="0" Classes="labelTiny" Text="Technology"/>
+            <TextBlock Grid.Column="1" Classes="labelTiny" Text="Share" Margin="0,0,24,0"/>
+            <TextBlock Grid.Column="2" Classes="labelTiny" Text="Total"/>
+          </Grid>
+          
+          <ItemsControl ItemsSource="{Binding TopTechs}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:TechStatDisplay">
+                <Border BorderBrush="#2a2a2a" BorderThickness="0,0,0,1" Padding="0,8">
+                  <Grid ColumnDefinitions="*,Auto,Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                      <Border Width="16" Height="16" CornerRadius="4" Background="{Binding Color}">
+                        <TextBlock Text="{Binding Initial}" FontSize="8" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      </Border>
+                      <TextBlock Text="{Binding Name}" Foreground="#d4d4d8" FontSize="12"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="{Binding Share}" Foreground="#d4d4d8" FontSize="12" FontWeight="Medium" Margin="0,0,24,0"/>
+                    <TextBlock Grid.Column="2" Text="{Binding Count}" Foreground="White" FontSize="12"/>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      
+      <StackPanel Spacing="12">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Grid.Column="0" Text="All Projects" FontSize="14" FontWeight="Medium" Foreground="White"/>
+          <TextBox Grid.Column="1" Classes="searchBox" Width="256" Watermark="Search by name..." Text="{Binding SearchQuery}"/>
+        </Grid>
+
+        <Border Classes="card" CornerRadius="12">
+          <StackPanel>
+            
+            <Border Background="#161616" BorderBrush="#2a2a2a" BorderThickness="0,0,0,1" Padding="20,12">
+              <Grid ColumnDefinitions="*,150,150">
+                <TextBlock Grid.Column="0" Classes="labelTiny" Text="PROJECT"/>
+                <TextBlock Grid.Column="1" Classes="labelTiny" Text="STATUS" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="2" Classes="labelTiny" Text="LAST ACTIVITY" HorizontalAlignment="Right"/>
+              </Grid>
+            </Border>
+            
+            <ItemsControl ItemsSource="{Binding FilteredProjects}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:Project">
+                  <Border BorderBrush="#2a2a2a" BorderThickness="0,0,0,0.5" Padding="20,12" Background="Transparent" Cursor="Hand" x:Name="ProjectRow" PointerPressed="ProjectRow_PointerPressed" Tag="{Binding Id}">
+                    <Grid ColumnDefinitions="*,150,150">
+                      <TextBlock Grid.Column="0" Text="{Binding Name}" Foreground="#d4d4d8" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                      <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border Background="{Binding Status, Converter={StaticResource StatusBgConverter}}" CornerRadius="4" Padding="6,2">
+                          <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Ellipse Width="6" Height="6" Fill="{Binding Status, Converter={StaticResource StatusColorConverter}}"/>
+                            <TextBlock Text="{Binding Status}" Foreground="{Binding Status, Converter={StaticResource StatusColorConverter}}" FontSize="10" FontWeight="Bold"/>
+                          </StackPanel>
+                        </Border>
+                      </StackPanel>
+                      <TextBlock Grid.Column="2" Text="{Binding TimeAgo}" Foreground="#8b8b90" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+  </StackPanel>
+</UserControl>
