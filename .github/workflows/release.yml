@@ -35,7 +35,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            publish/ProjectDashboard.Avalonia.exe
+            publish/Project Dashboard.exe
             ProjectDashboard-win-x64.zip
           draft: false
           prerelease: false
