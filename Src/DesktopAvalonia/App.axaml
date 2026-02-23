@@ -13,7 +13,7 @@
 
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="avares://ProjectDashboard.Avalonia/Styles/AppStyles.axaml" />
+        <StyleInclude Source="avares://Project Dashboard/Styles/AppStyles.axaml" />
         <Style Selector="Path">
             <Setter Property="Stretch" Value="Uniform"/>
         </Style>

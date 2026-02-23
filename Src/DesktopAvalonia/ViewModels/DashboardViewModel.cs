@@ -132,7 +132,7 @@ public class DashboardViewModel : ViewModelBase
                 var tech = techGroups[i];
                 var share = totalTech > 0 ? (double)tech.Count / totalTech * 100 : 0;
                 var fileName = tech.Name.ToLowerInvariant() + ".svg";
-                var uri = new Uri($"avares://ProjectDashboard.Avalonia/Assets/svgs/{fileName}");
+                var uri = new Uri($"avares://Project Dashboard/Assets/svgs/{fileName}");
                 var svgPath = global::Avalonia.Platform.AssetLoader.Exists(uri) ? uri.ToString() : null;
 
                 TopTechs.Add(new TechStatDisplay

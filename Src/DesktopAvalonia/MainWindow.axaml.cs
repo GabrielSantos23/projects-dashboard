@@ -85,9 +85,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         base.OnLoaded(e);
         try
         {
+            EnsureStartMenuShortcut();
             await LoadSidebarData();
-            NavigateToDashboard();
-            
             NavigateToDashboard();
             
             _ = CheckForUpdatesAsync();
@@ -96,6 +95,39 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             System.Diagnostics.Debug.WriteLine($"Error during load: {ex}");
             System.IO.File.AppendAllText("debug_log.txt", $"Error during load: {ex.Message}\n");
+        }
+    }
+
+    private void EnsureStartMenuShortcut()
+    {
+        try
+        {
+            var exePath = Process.GetCurrentProcess().MainModule?.FileName;
+            if (string.IsNullOrEmpty(exePath) || !exePath.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) return;
+            
+            // Only create shortcut if we are running the published exe, not inside 'bin/Debug'
+            if (exePath.Contains(@"\bin\Debug") || exePath.Contains(@"\bin\Release")) return;
+
+            var startMenu = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+            var shortcutDir = Path.Combine(startMenu, "Programs", "Project Dashboard");
+            if (!Directory.Exists(shortcutDir)) Directory.CreateDirectory(shortcutDir);
+            
+            var shortcutPath = Path.Combine(shortcutDir, "Project Dashboard.lnk");
+            
+            if (!File.Exists(shortcutPath))
+            {
+                var script = $"$s=(New-Object -COM WScript.Shell).CreateShortcut('{shortcutPath}');$s.TargetPath='{exePath}';$s.Save()";
+                var psInfo = new ProcessStartInfo("powershell", $"-NoProfile -ExecutionPolicy Bypass -Command \"{script}\"")
+                {
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+                Process.Start(psInfo);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to create shortcut: {ex}");
         }
     }
 
@@ -432,16 +464,17 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
             try
             {
-                var tempFile = Path.Combine(Path.GetTempPath(), "ProjectDashboard_Update.exe");
+                var tempFile = Path.Combine(Path.GetTempPath(), $"ProjectDashboard_Update_{Guid.NewGuid():N}.exe");
                 
                 using var client = new HttpClient();
                 client.DefaultRequestHeaders.Add("User-Agent", "ProjectDashboard-App");
                 
-                var response = await client.GetAsync(_exeDownloadUrl);
+                var response = await client.GetAsync(_exeDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
                 
                 using var fileStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None);
                 await response.Content.CopyToAsync(fileStream);
+                await fileStream.FlushAsync();
                 fileStream.Close(); // ensure stream is completely flushed
 
                 Process.Start(new ProcessStartInfo
@@ -456,9 +489,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error downloading update: {ex}");
+                System.IO.File.AppendAllText("debug_log.txt", $"Error downloading update: {ex.Message}\n{ex.StackTrace}\n");
+                
                 if (btn != null) 
                 {
-                    btn.Content = "Download Failed";
+                    btn.Content = $"Download Failed: {ex.Message}";
+                    ToolTip.SetTip(btn, ex.ToString());
                     btn.IsEnabled = true;
                 }
             }

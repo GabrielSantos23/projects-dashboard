@@ -10,14 +10,14 @@
         Title="Projects Hub"
         Background="#1a1a1a"
         Foreground="#a1a1aa"
-        FontFamily="avares://ProjectDashboard.Avalonia/font#Satoshi, Inter, Arial, sans-serif"
+        FontFamily="avares://Project Dashboard/font#Satoshi, Inter, Arial, sans-serif"
         WindowStartupLocation="CenterScreen"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="-1"
         Width="1280" Height="800"
         MinWidth="1200" MinHeight="600"
-        Icon="avares://ProjectDashboard.Avalonia/Styles/logo.png"
+        Icon="avares://Project Dashboard/Styles/logo.png"
         x:DataType="local:MainWindow">
 
 
@@ -55,7 +55,7 @@
                     <Button x:Name="BrandButton" Grid.Row="0" Padding="16,20" Background="Transparent" Classes="sidebarItem" Click="SidebarToggle_Click">
                         <Grid ColumnDefinitions="Auto,*,Auto">
                             <StackPanel x:Name="BrandPanel" Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                                <Image Source="avares://ProjectDashboard.Avalonia/Styles/logo.png" Width="20" Height="20" VerticalAlignment="Center" />
+                                <Image Source="avares://Project Dashboard/Styles/logo.png" Width="28" Height="28" Margin="0,0,12,0"/>
                                 <TextBlock x:Name="BrandText" Text="Projects Hub" Foreground="#d4d4d8" FontWeight="Medium" FontSize="13" VerticalAlignment="Center" Margin="2,0,0,0"/>
                             </StackPanel>
                             <Path x:Name="SidebarToggleIcon" Grid.Column="2" Classes="icon" Stroke="#d4d4d8" Opacity="0.4" Data="M19 3v18 M12 9 l3 3 -3 3 M5 3h18v18H5z" Width="14"/>

@@ -245,7 +245,7 @@ public class ProjectDetailViewModel : ViewModelBase
             {
                 var pt = techPillsList[i];
                 var fileName = pt.ToLowerInvariant() + ".svg";
-                var uri = new Uri($"avares://ProjectDashboard.Avalonia/Assets/svgs/{fileName}");
+                var uri = new Uri($"avares://Project Dashboard/Assets/svgs/{fileName}");
                 var svgPath = global::Avalonia.Platform.AssetLoader.Exists(uri) ? uri.ToString() : null;
 
                 TechPills.Add(new TechPillDisplay

@@ -1,11 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <DefineConstants Condition="'$(Configuration)' != 'Debug'">AVALONIA_INTERACTIVE</DefineConstants>
+    <ApplicationIcon>Styles\logo.ico</ApplicationIcon>
+    <AssemblyName>Project Dashboard</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
