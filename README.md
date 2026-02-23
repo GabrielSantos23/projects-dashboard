@@ -1,10 +1,14 @@
 # Project Dashboard 🚀
 
+![Capa do Project Dashboard](capa.png)
+
 O **Project Dashboard** é uma ferramenta poderosa para te ajudar a organizar, rastrear e gerenciar todos os projetos de código (repositórios Git) que ficam espalhados pelo seu computador.
 
 Sabe quando você tem dezenas de pastas com testes, projetos antigos, repositórios de clientes, e acaba perdendo a noção do que tem ali? Esse dashboard resolve isso fazendo um scan nas suas pastas e montando um painel bonito e interativo com tudo o que ele encontra.
 
 ---
+
+[![Download for Windows](https://img.shields.io/badge/Download_for-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/GabrielSantos23/projects-dashboard/releases/latest)
 
 ## ✨ O que ele faz?
 
