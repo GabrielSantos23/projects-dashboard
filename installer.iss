@@ -1,7 +1,7 @@
 [Setup]
 ; App Information
 AppName=Project Dashboard
-AppVersion=1.0.4
+AppVersion=1.0.6
 AppPublisher=Gabriel Santos
 AppPublisherURL=https://github.com/GabrielSantos23/projects-dashboard
 AppSupportURL=https://github.com/GabrielSantos23/projects-dashboard/issues
