@@ -7,12 +7,14 @@ using System.Windows.Input;
 using Microsoft.EntityFrameworkCore;
 using ProjectDashboard.Shared.Data;
 using ProjectDashboard.Shared.Models;
+using ProjectDashboard.Shared.Services;
 
 namespace ProjectDashboard.Avalonia.ViewModels;
 
 public class RecentActivityViewModel : ViewModelBase
 {
     private readonly IDbContextFactory<AppDbContext>? _dbFactory;
+    private readonly ScannerService? _scannerService;
 
     public ObservableCollection<Project> Projects { get; } = new();
 
@@ -48,9 +50,10 @@ public class RecentActivityViewModel : ViewModelBase
         RefreshCommand = new RelayCommand(async () => await HandleRefresh());
     }
 
-    public RecentActivityViewModel(IDbContextFactory<AppDbContext> dbFactory) : this()
+    public RecentActivityViewModel(IDbContextFactory<AppDbContext> dbFactory, ScannerService scannerService) : this()
     {
         _dbFactory = dbFactory;
+        _scannerService = scannerService;
     }
 
     public async Task LoadProjects()
@@ -81,8 +84,26 @@ public class RecentActivityViewModel : ViewModelBase
     {
         IsRefreshing = true;
         OnPropertyChanged(nameof(IsRefreshing));
-        await Task.Delay(400);
+
+        try
+        {
+            if (_dbFactory != null && _scannerService != null)
+            {
+                using var db = await _dbFactory.CreateDbContextAsync();
+                var folders = await db.ScanFolders.ToListAsync();
+                foreach (var folder in folders)
+                {
+                    await Task.Run(async () => await _scannerService.ScanAsync(folder.Path, 9999));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error scanning in HandleRefresh: {ex}");
+        }
+
         await LoadProjects();
+        
         IsRefreshing = false;
         OnPropertyChanged(nameof(IsRefreshing));
     }
