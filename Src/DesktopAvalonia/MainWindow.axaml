@@ -17,6 +17,7 @@
         ExtendClientAreaTitleBarHeightHint="-1"
         Width="1280" Height="800"
         MinWidth="1200" MinHeight="600"
+        Icon="avares://ProjectDashboard.Avalonia/Styles/logo.png"
         x:DataType="local:MainWindow">
 
 
@@ -54,11 +55,7 @@
                     <Button x:Name="BrandButton" Grid.Row="0" Padding="16,20" Background="Transparent" Classes="sidebarItem" Click="SidebarToggle_Click">
                         <Grid ColumnDefinitions="Auto,*,Auto">
                             <StackPanel x:Name="BrandPanel" Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                                <StackPanel Orientation="Horizontal" Spacing="3" VerticalAlignment="Center">
-                                    <Ellipse Width="8" Height="8" Fill="White" Opacity="0.9"/>
-                                    <Ellipse Width="8" Height="8" Fill="White" Opacity="0.6"/>
-                                    <Ellipse Width="8" Height="8" Fill="White" Opacity="0.3"/>
-                                </StackPanel>
+                                <Image Source="avares://ProjectDashboard.Avalonia/Styles/logo.png" Width="20" Height="20" VerticalAlignment="Center" />
                                 <TextBlock x:Name="BrandText" Text="Projects Hub" Foreground="#d4d4d8" FontWeight="Medium" FontSize="13" VerticalAlignment="Center" Margin="2,0,0,0"/>
                             </StackPanel>
                             <Path x:Name="SidebarToggleIcon" Grid.Column="2" Classes="icon" Stroke="#d4d4d8" Opacity="0.4" Data="M19 3v18 M12 9 l3 3 -3 3 M5 3h18v18H5z" Width="14"/>
@@ -149,6 +146,35 @@
         <ScrollViewer Grid.Column="1" x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Background="#1a1a1a">
             <ContentControl x:Name="MainContentHost"/>
         </ScrollViewer>
+        
+        <Border x:Name="UpdateToastContainer" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,32,32" 
+                Background="#1e1e1e" BorderBrush="#3a3a3a" BorderThickness="1" CornerRadius="12" Padding="20"
+                BoxShadow="0 10 30 0 #50000000" IsVisible="False" Width="360">
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <Border Background="#2a2a2a" CornerRadius="8" Width="36" Height="36">
+                            <Path Width="16" Height="16" Fill="#00E5FF" Data="M12 2v14m0 0l-5-5m5 5l5-5M4 22h16" Stroke="#00E5FF" StrokeThickness="1.5" Stretch="Uniform" Margin="0,2,0,0"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Text="App Update Available" Foreground="White" FontWeight="Bold" FontSize="14"/>
+                            <TextBlock x:Name="UpdateVersionText" Text="Version 2.1.0 is ready" Foreground="#a1a1aa" FontSize="12"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <Button Grid.Column="1" Background="Transparent" BorderThickness="0" Padding="8" VerticalAlignment="Top" Margin="0,-8,-8,0" Click="CloseUpdateToast_Click" Cursor="Hand">
+                        <Path Width="10" Height="10" Stroke="#8b8b90" StrokeThickness="1.5" Data="M0 0l10 10M0 10L10 0" Stretch="Uniform"/>
+                    </Button>
+                </Grid>
+                
+                <TextBlock x:Name="UpdateBodyText" Text="Experience faster repository scanning, new dashboard insights, and UI performance improvements. Update now to get the latest features!" 
+                           Foreground="#d4d4d8" FontSize="13" TextWrapping="Wrap" LineHeight="20" Margin="0,4,0,8"/>
+                
+                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
+                    <Button Classes="actionBtn" Content="Later" Background="Transparent" BorderBrush="#3a3a3a" BorderThickness="1" Foreground="#d4d4d8" Click="CloseUpdateToast_Click"/>
+                    <Button x:Name="DownloadUpdateBtn" Classes="actionBtn" Content="Download" Background="#00E5FF" Foreground="#000000" FontWeight="Bold" Click="DownloadUpdate_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
     </Grid>
     </Grid>
 </Window>

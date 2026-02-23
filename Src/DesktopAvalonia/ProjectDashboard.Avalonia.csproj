@@ -26,6 +26,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
     <AvaloniaResource Include="font\**\*.*" />
+    <AvaloniaResource Include="Styles\logo.png" />
     <AvaloniaResource Include="..\Shared\svgs\**\*.svg" Link="Assets\svgs\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

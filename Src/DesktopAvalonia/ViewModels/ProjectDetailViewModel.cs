@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjectDashboard.Shared.Data;
 using ProjectDashboard.Shared.Models;
 using ProjectDashboard.Shared.Services;
+using LibGit2Sharp;
 
 namespace ProjectDashboard.Avalonia.ViewModels;
 
@@ -55,6 +56,80 @@ public class ProjectDetailViewModel : ViewModelBase
         set => SetProperty(ref _showDeleteModal, value);
     }
 
+    private bool _showTagsModal;
+    public bool ShowTagsModal
+    {
+        get => _showTagsModal;
+        set => SetProperty(ref _showTagsModal, value);
+    }
+
+    private string _editingTags = "";
+    public string EditingTags
+    {
+        get => _editingTags;
+        set => SetProperty(ref _editingTags, value);
+    }
+
+    private bool _showCommitModal;
+    public bool ShowCommitModal
+    {
+        get => _showCommitModal;
+        set => SetProperty(ref _showCommitModal, value);
+    }
+
+    private string _commitMessage = "";
+    public string CommitMessage
+    {
+        get => _commitMessage;
+        set => SetProperty(ref _commitMessage, value);
+    }
+
+    private string _commitError = "";
+    public string CommitError
+    {
+        get => _commitError;
+        set => SetProperty(ref _commitError, value);
+    }
+
+    private bool _isCommitting;
+    public bool IsCommitting
+    {
+        get => _isCommitting;
+        set
+        {
+            SetProperty(ref _isCommitting, value);
+            OnPropertyChanged(nameof(CommitButtonText));
+        }
+    }
+
+    private bool _showGitTagModal;
+    public bool ShowGitTagModal
+    {
+        get => _showGitTagModal;
+        set => SetProperty(ref _showGitTagModal, value);
+    }
+
+    private string _gitTagName = "";
+    public string GitTagName
+    {
+        get => _gitTagName;
+        set => SetProperty(ref _gitTagName, value);
+    }
+
+    private string _gitTagMessage = "";
+    public string GitTagMessage
+    {
+        get => _gitTagMessage;
+        set => SetProperty(ref _gitTagMessage, value);
+    }
+
+    private string _gitTagError = "";
+    public string GitTagError
+    {
+        get => _gitTagError;
+        set => SetProperty(ref _gitTagError, value);
+    }
+
     private bool _isDeleting;
     public bool IsDeleting
     {
@@ -96,6 +171,7 @@ public class ProjectDetailViewModel : ViewModelBase
     public string RescanText => IsRescanning ? "Scanning..." : "Rescan Project";
     public string PinText => Project?.IsPinned == true ? "Unpin Project" : "Pin Project";
     public string DeleteButtonText => IsDeleting ? "Deleting..." : "Yes, Delete Completely";
+    public string CommitButtonText => IsCommitting ? "Committing..." : "Commit";
 
     public ProjectDetailViewModel() { }
 
@@ -205,6 +281,115 @@ public class ProjectDetailViewModel : ViewModelBase
         IsRescanning = false;
         OnPropertyChanged(nameof(IsRescanning));
         OnPropertyChanged(nameof(RescanText));
+    }
+
+    public void OpenTagsModal()
+    {
+        EditingTags = Project?.Tags ?? "";
+        ShowTagsModal = true;
+    }
+
+    public async Task SaveTags()
+    {
+        if (Project != null && _dbFactory != null)
+        {
+            Project.Tags = EditingTags;
+            using var db = await _dbFactory.CreateDbContextAsync();
+            db.Projects.Update(Project);
+            await db.SaveChangesAsync();
+            OnPropertyChanged(nameof(Project));
+        }
+        ShowTagsModal = false;
+    }
+
+    public void OpenCommitModal()
+    {
+        CommitMessage = "";
+        CommitError = "";
+        ShowCommitModal = true;
+    }
+
+    public async Task CreateCommit()
+    {
+        if (Project == null || string.IsNullOrWhiteSpace(CommitMessage)) return;
+        
+        IsCommitting = true;
+        CommitError = "";
+        
+        try
+        {
+            await Task.Run(() => 
+            {
+                using var repo = new Repository(Project.Path);
+                Commands.Stage(repo, "*");
+                
+                Signature signature;
+                try
+                {
+                    signature = repo.Config.BuildSignature(DateTimeOffset.Now);
+                }
+                catch
+                {
+                    signature = new Signature("User", "user@example.com", DateTimeOffset.Now);
+                }
+
+                repo.Commit(CommitMessage, signature, signature);
+            });
+            
+            ShowCommitModal = false;
+            await RescanProject();
+        }
+        catch (Exception ex)
+        {
+            CommitError = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            IsCommitting = false;
+        }
+    }
+
+    public void OpenGitTagModal()
+    {
+        GitTagName = "";
+        GitTagMessage = "";
+        GitTagError = "";
+        ShowGitTagModal = true;
+    }
+
+    public void CreateGitTag()
+    {
+        if (Project == null || string.IsNullOrWhiteSpace(GitTagName)) return;
+        
+        try
+        {
+            using var repo = new Repository(Project.Path);
+            
+            Signature signature;
+            try
+            {
+                signature = repo.Config.BuildSignature(DateTimeOffset.Now);
+            }
+            catch
+            {
+                signature = new Signature("User", "user@example.com", DateTimeOffset.Now);
+            }
+
+            if (string.IsNullOrWhiteSpace(GitTagMessage))
+            {
+                repo.ApplyTag(GitTagName);
+            }
+            else
+            {
+                repo.ApplyTag(GitTagName, repo.Head.Tip.Sha, signature, GitTagMessage);
+            }
+            
+            ShowGitTagModal = false;
+        }
+        catch (Exception ex)
+        {
+            GitTagError = $"Error: {ex.Message}";
+        }
     }
 
     public async Task DeleteProject()

@@ -4,6 +4,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -30,6 +33,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private bool isSidebarCollapsed = false;
     private UserControl? _currentView;
     private string _currentPage = "Dashboard";
+
+    private const string CurrentVersion = "1.0.0";
+    private string _latestReleaseUrl = "";
+    private string _exeDownloadUrl = "";
 
     public ObservableCollection<Project> PinnedProjects { get; } = new();
     
@@ -80,6 +87,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             await LoadSidebarData();
             NavigateToDashboard();
+            
+            NavigateToDashboard();
+            
+            _ = CheckForUpdatesAsync();
         }
         catch (Exception ex)
         {
@@ -399,6 +410,140 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             System.IO.File.AppendAllText("debug_log.txt", $"MainWindow - Error showing scan modal: {ex.Message}\n{ex.StackTrace}\n");
             _currentScanModal = null;
+        }
+    }
+    
+    // UI Event Handler for checking updates / dismissing 
+    private void CloseUpdateToast_Click(object? sender, RoutedEventArgs e)
+    {
+        UpdateToastContainer.IsVisible = false;
+    }
+
+    private async void DownloadUpdate_Click(object? sender, RoutedEventArgs e)
+    {
+        var btn = sender as Button;
+        if (!string.IsNullOrEmpty(_exeDownloadUrl))
+        {
+            if (btn != null) 
+            {
+                btn.Content = "Downloading...";
+                btn.IsEnabled = false;
+            }
+
+            try
+            {
+                var tempFile = Path.Combine(Path.GetTempPath(), "ProjectDashboard_Update.exe");
+                
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.Add("User-Agent", "ProjectDashboard-App");
+                
+                var response = await client.GetAsync(_exeDownloadUrl);
+                response.EnsureSuccessStatusCode();
+                
+                using var fileStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None);
+                await response.Content.CopyToAsync(fileStream);
+                fileStream.Close(); // ensure stream is completely flushed
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = tempFile,
+                    UseShellExecute = true
+                });
+
+                // Exit app so the update installer can apply its changes
+                Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error downloading update: {ex}");
+                if (btn != null) 
+                {
+                    btn.Content = "Download Failed";
+                    btn.IsEnabled = true;
+                }
+            }
+        }
+        else if (!string.IsNullOrEmpty(_latestReleaseUrl))
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = _latestReleaseUrl,
+                    UseShellExecute = true
+                });
+            }
+            catch { }
+            UpdateToastContainer.IsVisible = false;
+        }
+        else
+        {
+            UpdateToastContainer.IsVisible = false;
+        }
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("User-Agent", "ProjectDashboard-App");
+            
+            var response = await client.GetAsync("https://api.github.com/repos/GabrielSantos23/projects-dashboard/releases/latest");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                
+                if (root.TryGetProperty("tag_name", out var tagElement) && root.TryGetProperty("html_url", out var urlElement))
+                {
+                    var latestVersionStr = tagElement.GetString()?.TrimStart('v', 'V') ?? "";
+                    
+                    if (Version.TryParse(latestVersionStr, out var latest) && Version.TryParse(CurrentVersion.TrimStart('v', 'V'), out var current))
+                    {
+                        if (latest > current)
+                        {
+                            var body = root.TryGetProperty("body", out var bodyEl) ? bodyEl.GetString() : "";
+                            _latestReleaseUrl = urlElement.GetString() ?? "";
+                            _exeDownloadUrl = "";
+
+                            if (root.TryGetProperty("assets", out var assets) && assets.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var asset in assets.EnumerateArray())
+                                {
+                                    if (asset.TryGetProperty("name", out var nameEl) && nameEl.GetString()?.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) == true)
+                                    {
+                                        if (asset.TryGetProperty("browser_download_url", out var dlUrlEl))
+                                        {
+                                            _exeDownloadUrl = dlUrlEl.GetString() ?? "";
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            global::Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                            {
+                                var updateVersionText = this.FindControl<TextBlock>("UpdateVersionText");
+                                if (updateVersionText != null) updateVersionText.Text = $"Version {latestVersionStr} is ready";
+                                
+                                var updateBodyText = this.FindControl<TextBlock>("UpdateBodyText");
+                                if (updateBodyText != null) 
+                                {
+                                    updateBodyText.Text = string.IsNullOrWhiteSpace(body) ? "A new version of Project Dashboard is available." : body;
+                                }
+                                
+                                UpdateToastContainer.IsVisible = true;
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error checking for updates: {ex}");
         }
     }
 }

@@ -136,7 +136,7 @@
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <Button Background="Transparent" Padding="0" HorizontalAlignment="Left">
+                <Button x:Name="ManageTagsBtn" Background="Transparent" Padding="0" HorizontalAlignment="Left">
                   <StackPanel Orientation="Horizontal" Spacing="4">
                     <TextBlock Text="Manage Tags" Foreground="#0088ff" FontSize="11" FontWeight="Medium"/>
                     <Path Width="12" Height="12" Stroke="#0088ff" StrokeThickness="2" Data="M9 5l7 7-7 7"/>
@@ -170,7 +170,7 @@
                       
                       <Border BorderBrush="#2a2a2a" BorderThickness="0,0,0,0.5" Padding="4,4,0,24" Grid.Column="1">
                         <StackPanel Spacing="10">
-                          <TextBlock Text="{Binding Message}" Foreground="#d4d4d8" FontSize="13" FontWeight="Medium" TextWrapping="Wrap" LineHeight="18"/>
+                          <TextBlock Text="{Binding Message}" Foreground="#d4d4d8" FontSize="13" FontWeight="Medium" TextWrapping="Wrap" LineHeight="18" MaxLines="2" TextTrimming="CharacterEllipsis"/>
                           <StackPanel Orientation="Horizontal" Spacing="10">
                             <Border Width="18" Height="18" CornerRadius="9" Background="#2a2a2a">
                               <TextBlock Text="{Binding AuthorInitial}" FontSize="8" FontWeight="Bold" Foreground="#d4d4d8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -298,6 +298,18 @@
                     <TextBlock Text="App Settings" Foreground="#d4d4d8" FontSize="13" FontWeight="Medium"/>
                   </StackPanel>
                 </Button>
+                <Button Classes="quickAction" x:Name="CommitBtn">
+                  <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Path Width="16" Height="16" Stroke="#a1a1aa" StrokeThickness="2" Data="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z"/>
+                    <TextBlock Text="Commit Changes" Foreground="#d4d4d8" FontSize="13" FontWeight="Medium"/>
+                  </StackPanel>
+                </Button>
+                <Button Classes="quickAction" x:Name="GitTagBtn">
+                  <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Path Width="16" Height="16" Stroke="#a1a1aa" StrokeThickness="2" Data="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/>
+                    <TextBlock Text="Add Git Tag" Foreground="#d4d4d8" FontSize="13" FontWeight="Medium"/>
+                  </StackPanel>
+                </Button>
                 <Button Classes="dangerBtn" x:Name="DeleteBtn">
                   <StackPanel Orientation="Horizontal" Spacing="12">
                     <Path Width="16" Height="16" Stroke="#ff3b30" StrokeThickness="2" Data="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -336,6 +348,72 @@
             </Button>
             <Button Grid.Column="2" Classes="primaryBtn" Background="#ff3b30" x:Name="ConfirmDeleteBtn" IsEnabled="{Binding !IsDeleting}">
               <TextBlock Text="{Binding DeleteButtonText}"/>
+            </Button>
+          </Grid>
+        </StackPanel>
+      </Border>
+    </Panel>
+
+    <Panel IsVisible="{Binding ShowTagsModal}" ZIndex="100">
+      <Border Background="#00000099" CornerRadius="0"/>
+      <Border Background="#1e1e20" CornerRadius="12" BorderBrush="#2a2a2a" BorderThickness="1" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+        <StackPanel Spacing="16">
+          <TextBlock Text="Manage Project Tags" FontSize="18" FontWeight="Medium" Foreground="White"/>
+          <TextBlock Text="Enter comma-separated tags:" Foreground="#8b8b90" FontSize="13"/>
+          <TextBox Text="{Binding EditingTags}" Background="#1a1a1a" Foreground="White" BorderBrush="#2a2a2a" CornerRadius="6" Padding="12,8"/>
+          
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12" Margin="0,8,0,0">
+            <Button Grid.Column="1" Classes="actionBtn" x:Name="CancelTagsBtn">
+              <TextBlock Text="Cancel" Foreground="#d4d4d8" FontSize="13" FontWeight="Medium"/>
+            </Button>
+            <Button Grid.Column="2" Classes="primaryBtn" x:Name="SaveTagsBtn">
+              <TextBlock Text="Save Tags"/>
+            </Button>
+          </Grid>
+        </StackPanel>
+      </Border>
+    </Panel>
+
+    <Panel IsVisible="{Binding ShowCommitModal}" ZIndex="100">
+      <Border Background="#00000099" CornerRadius="0"/>
+      <Border Background="#1e1e20" CornerRadius="12" BorderBrush="#2a2a2a" BorderThickness="1" Width="450" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+        <StackPanel Spacing="16">
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <Path Width="24" Height="24" Stroke="#0088ff" StrokeThickness="2" Data="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+            <TextBlock Text="Create Git Commit" FontSize="18" FontWeight="Medium" Foreground="White"/>
+          </StackPanel>
+          
+          <TextBlock Text="This will stage all current changes and create a commit." Foreground="#8b8b90" FontSize="13" TextWrapping="Wrap"/>
+          <TextBox Text="{Binding CommitMessage}" Watermark="Commit message..." AcceptsReturn="True" Height="80" Background="#1a1a1a" Foreground="White" BorderBrush="#2a2a2a" CornerRadius="6" Padding="12,8"/>
+          <TextBlock Text="{Binding CommitError}" Foreground="#ff3b30" FontSize="12" TextWrapping="Wrap" IsVisible="{Binding CommitError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12" Margin="0,8,0,0">
+            <Button Grid.Column="1" Classes="actionBtn" x:Name="CancelCommitBtn">
+              <TextBlock Text="Cancel" Foreground="#d4d4d8" FontSize="13" FontWeight="Medium"/>
+            </Button>
+            <Button Grid.Column="2" Classes="primaryBtn" x:Name="ConfirmCommitBtn" IsEnabled="{Binding !IsCommitting}">
+              <TextBlock Text="{Binding CommitButtonText}"/>
+            </Button>
+          </Grid>
+        </StackPanel>
+      </Border>
+    </Panel>
+
+    <Panel IsVisible="{Binding ShowGitTagModal}" ZIndex="100">
+      <Border Background="#00000099" CornerRadius="0"/>
+      <Border Background="#1e1e20" CornerRadius="12" BorderBrush="#2a2a2a" BorderThickness="1" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+        <StackPanel Spacing="16">
+          <TextBlock Text="Create Git Tag" FontSize="18" FontWeight="Medium" Foreground="White"/>
+          <TextBox Text="{Binding GitTagName}" Watermark="Tag name (e.g. v1.0.0)" Background="#1a1a1a" Foreground="White" BorderBrush="#2a2a2a" CornerRadius="6" Padding="12,8"/>
+          <TextBox Text="{Binding GitTagMessage}" Watermark="Message (optional)" AcceptsReturn="True" Height="60" Background="#1a1a1a" Foreground="White" BorderBrush="#2a2a2a" CornerRadius="6" Padding="12,8"/>
+          <TextBlock Text="{Binding GitTagError}" Foreground="#ff3b30" FontSize="12" TextWrapping="Wrap" IsVisible="{Binding GitTagError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12" Margin="0,8,0,0">
+            <Button Grid.Column="1" Classes="actionBtn" x:Name="CancelGitTagBtn">
+              <TextBlock Text="Cancel" Foreground="#d4d4d8" FontSize="13" FontWeight="Medium"/>
+            </Button>
+            <Button Grid.Column="2" Classes="primaryBtn" x:Name="ConfirmGitTagBtn">
+              <TextBlock Text="Create Tag"/>
             </Button>
           </Grid>
         </StackPanel>

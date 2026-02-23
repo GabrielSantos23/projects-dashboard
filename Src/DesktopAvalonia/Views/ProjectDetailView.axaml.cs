@@ -87,6 +87,96 @@ public partial class ProjectDetailView : UserControl
             settingsNavBtn.Click += (s, args) => SettingsRequested?.Invoke(this, EventArgs.Empty);
         }
 
+        var manageTagsBtn = this.FindControl<Button>("ManageTagsBtn");
+        if (manageTagsBtn != null)
+        {
+            manageTagsBtn.Click += (s, args) =>
+            {
+                if (DataContext is ProjectDetailViewModel vm)
+                    vm.OpenTagsModal();
+            };
+        }
+
+        var cancelTagsBtn = this.FindControl<Button>("CancelTagsBtn");
+        if (cancelTagsBtn != null)
+        {
+            cancelTagsBtn.Click += (s, args) =>
+            {
+                if (DataContext is ProjectDetailViewModel vm)
+                    vm.ShowTagsModal = false;
+            };
+        }
+
+        var saveTagsBtn = this.FindControl<Button>("SaveTagsBtn");
+        if (saveTagsBtn != null)
+        {
+            saveTagsBtn.Click += async (s, args) =>
+            {
+                if (DataContext is ProjectDetailViewModel vm)
+                    await vm.SaveTags();
+            };
+        }
+
+        var commitBtn = this.FindControl<Button>("CommitBtn");
+        if (commitBtn != null)
+        {
+            commitBtn.Click += (s, args) =>
+            {
+                if (DataContext is ProjectDetailViewModel vm)
+                    vm.OpenCommitModal();
+            };
+        }
+
+        var cancelCommitBtn = this.FindControl<Button>("CancelCommitBtn");
+        if (cancelCommitBtn != null)
+        {
+            cancelCommitBtn.Click += (s, args) =>
+            {
+                if (DataContext is ProjectDetailViewModel vm)
+                    vm.ShowCommitModal = false;
+            };
+        }
+
+        var confirmCommitBtn = this.FindControl<Button>("ConfirmCommitBtn");
+        if (confirmCommitBtn != null)
+        {
+            confirmCommitBtn.Click += async (s, args) =>
+            {
+                if (DataContext is ProjectDetailViewModel vm)
+                    await vm.CreateCommit();
+            };
+        }
+
+        var gitTagBtn = this.FindControl<Button>("GitTagBtn");
+        if (gitTagBtn != null)
+        {
+            gitTagBtn.Click += (s, args) =>
+            {
+                if (DataContext is ProjectDetailViewModel vm)
+                    vm.OpenGitTagModal();
+            };
+        }
+
+        var cancelGitTagBtn = this.FindControl<Button>("CancelGitTagBtn");
+        if (cancelGitTagBtn != null)
+        {
+            cancelGitTagBtn.Click += (s, args) =>
+            {
+                if (DataContext is ProjectDetailViewModel vm)
+                    vm.ShowGitTagModal = false;
+            };
+        }
+
+        var confirmGitTagBtn = this.FindControl<Button>("ConfirmGitTagBtn");
+        if (confirmGitTagBtn != null)
+        {
+            confirmGitTagBtn.Click += (s, args) =>
+            {
+                if (DataContext is ProjectDetailViewModel vm)
+                    vm.CreateGitTag();
+            };
+        }
+
         var deleteBtn = this.FindControl<Button>("DeleteBtn");
         if (deleteBtn != null)
         {
