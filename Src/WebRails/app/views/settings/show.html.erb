@@ -1,0 +1,92 @@
+<% content_for(:title) { "Settings" } %>
+
+<div class="min-h-screen text-[#d4d4d8] p-6 lg:p-8 font-sans" style="background-color: #1a1a1a;">
+  <div class="flex items-center justify-between mb-8 text-[13px]">
+    <div class="flex items-center text-[#8b8b90] gap-2">
+      <span>Settings</span><span>/</span>
+      <span class="text-[#d4d4d8]">Application Settings</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="relative">
+        <svg class="absolute left-3 top-2.5 w-3.5 h-3.5 text-[#5b5b60]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5-5m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <input type="text" placeholder="Search settings..." class="w-64 bg-[#161618] border border-[#2a2a2a] rounded-md text-[13px] text-white py-1.5 pl-9 pr-3 focus:outline-none focus:border-[#0088ff] transition-colors shadow-sm">
+      </div>
+      <%= form_tag(settings_path, method: :patch, id: "settings-form", class: "inline") do %>
+        <%= hidden_field_tag :editor_name, @editor %>
+        <%= hidden_field_tag :theme, @selected_theme %>
+        <button type="submit" class="px-4 h-8 rounded-md bg-[#0088ff] hover:bg-[#0077ee] text-white flex items-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(0,136,255,0.3)] font-medium">Save Changes</button>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <h1 class="text-2xl font-semibold tracking-wide text-white mb-2">Application Settings</h1>
+    <p class="text-[13px] text-[#8b8b90]">Manage how your dashboard interacts with your local filesystem and repositories.</p>
+  </div>
+
+  <div class="bg-[#1e1e20] border border-[#2a2a2a] rounded-xl p-6 mb-6 shadow-sm">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-8 h-8 rounded-lg bg-[#2a2a2a] border border-[#3a3a3a] flex items-center justify-center text-[#0088ff] shadow-sm">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>
+      </div>
+      <h2 class="text-base font-semibold text-white">Scan Configuration</h2>
+    </div>
+
+    <div class="mb-8">
+      <label class="block text-[11px] font-bold text-[#d4d4d8] tracking-wider mb-2">SCAN FOLDERS</label>
+      <div class="space-y-2 mb-3 max-h-48 overflow-y-auto custom-scrollbar">
+        <% if @folders.empty? %>
+          <div class="text-[12px] text-[#5b5b60] italic py-2">No scan folders added.</div>
+        <% else %>
+          <% @folders.each do |folder| %>
+            <div class="flex items-center justify-between bg-[#161618] border border-[#2a2a2a] rounded-md px-3 py-2 group hover:border-[#3a3a3a] transition-colors">
+              <span class="text-[13px] text-[#d4d4d8] font-mono truncate mr-4"><%= folder.path %></span>
+              <%= button_to remove_folder_settings_path(folder_id: folder.id), method: :delete, class: "text-[#5b5b60] hover:text-[#ff3b30] opacity-0 group-hover:opacity-100 transition-all" do %>
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <%= form_tag(add_folder_settings_path, method: :post, class: "flex gap-2") do %>
+        <%= text_field_tag :folder_path, nil, placeholder: "Enter folder path...", class: "flex-1 bg-[#161618] border border-[#2a2a2a] rounded-md text-[13px] text-[#d4d4d8] py-2 px-3 focus:outline-none focus:border-[#0088ff] transition-colors" %>
+        <button type="submit" class="px-4 py-2 bg-[#0088ff] hover:bg-[#0077ee] text-white text-[13px] font-medium rounded-md transition-colors">Add</button>
+      <% end %>
+      <p class="text-[11px] text-[#5b5b60] mt-2">The root directories where the dashboard will recursively search for .git projects.</p>
+    </div>
+  </div>
+
+  <div class="bg-[#1e1e20] border border-[#2a2a2a] rounded-xl p-6 mb-6 shadow-sm">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-8 h-8 rounded-lg bg-[#2a2a2a] border border-[#3a3a3a] flex items-center justify-center text-[#34c759] shadow-sm">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+      </div>
+      <h2 class="text-base font-semibold text-white">Integration</h2>
+    </div>
+    <div class="grid grid-cols-2 gap-12 items-start">
+      <div>
+        <label class="block text-[11px] font-bold text-[#d4d4d8] tracking-wider mb-2">OPEN_IN_EDITOR</label>
+        <div class="relative">
+          <select id="editor-select" onchange="document.querySelector('#settings-form [name=editor_name]').value = this.value" class="w-full bg-[#161618] border border-[#2a2a2a] rounded-md text-[13px] text-[#d4d4d8] py-2 pl-3 pr-10 appearance-none focus:outline-none focus:border-[#0088ff] transition-colors cursor-pointer">
+            <option value="Cursor" <%= "selected" if @editor == "Cursor" %>>Cursor</option>
+            <option value="VS Code" <%= "selected" if @editor == "VS Code" %>>VS Code</option>
+            <option value="Rider" <%= "selected" if @editor == "Rider" %>>Rider</option>
+            <option value="Zed" <%= "selected" if @editor == "Zed" %>>Zed</option>
+            <option value="Antigravity" <%= "selected" if @editor == "Antigravity" %>>Antigravity</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-[#5b5b60]">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+        </div>
+        <p class="text-[11px] text-[#5b5b60] mt-2">Default application used when clicking 'Open in Editor' for a project.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setTheme(id) {
+    document.querySelector('#settings-form [name=theme]').value = id;
+  }
+</script>

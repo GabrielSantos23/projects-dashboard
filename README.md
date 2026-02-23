@@ -4,7 +4,7 @@ O **Project Dashboard** é uma ferramenta pra te ajudar a organizar, rastrear e 
 
 Sabe quando você tem dezenas de pastas com testes, projetos antigos, repositórios de clientes, e acaba perdendo a noção do que tem ali? Esse dashboard resolve isso fazendo um scan nas suas pastas e montando um painel bonito e interativo com tudo o que ele encontra.
 
-Ele foi construído em **.NET 9** usando **Blazor** e **Tailwind CSS**, e roda 100% localmente com um banco SQLite. Além disso, a interface principal é compartilhada pra rodar tanto como uma aplicação Web quanto como um app Desktop nativo do Windows (via .NET MAUI).
+Ele possui uma versão Desktop construída em **.NET 9** (via .NET MAUI / Avalonia) e uma nova versão Web independente construída em **Ruby on Rails** e **Tailwind CSS**. Ambas rodam 100% localmente com bancos SQLite.
 
 ---
 
@@ -21,14 +21,14 @@ Ele foi construído em **.NET 9** usando **Blazor** e **Tailwind CSS**, e roda 1
 
 ## 🛠️ Tecnologias Utilizadas
 
-A arquitetura do projeto é dividida em 3 partes: `Shared` (onde a mágica acontece), `Web` (Blazor Server) e `Desktop` (MAUI Hybrid).
+A arquitetura do projeto é dividida em partes independentes: `Shared/Desktop` (C#/.NET) e `WebRails` (Ruby on Rails).
 
-- **.NET 9** e **C#**
-- **Blazor** (Frontend reativo)
-- **Tailwind CSS** (Estilização inteira baseada em classes utilitárias)
-- **LibGit2Sharp** (Pra ler os repositórios reais sem precisar rodar comandos git pelo terminal)
-- **Entity Framework Core + SQLite** (Banco de dados local embutido em `%localappdata%\ProjectDashboard`)
-- **.NET MAUI** (Pra empacotar a versão desktop)
+- **.NET 9** e **C#** (App Desktop)
+- **Ruby on Rails 8** (App Web)
+- **Tailwind CSS v4** (Estilização baseada em classes utilitárias)
+- **LibGit2Sharp** (Desktop) e **Git CLI nativo** (Web) para ler os repositórios reais sem depender da CLI externa onde possível.
+- **Entity Framework Core + SQLite** (Banco de dados local embutido em `%localappdata%\ProjectDashboard` no Desktop, e db local do projeto no Rails)
+- **.NET MAUI / Avalonia** (Para empacotar a versão desktop)
 
 ---
 
@@ -48,16 +48,23 @@ cd caminho/pro/projeto
 dotnet run --project src/Desktop -f net9.0-windows10.0.19041.0
 ```
 
-### Para rodar a versão Web (Browser):
+### Para rodar a versão Web (Browser com Ruby on Rails):
 
-Se você prefere abrir pelo Chrome/Edge/Firefox:
+Certifique-se de que você tem o **Ruby 4.0** (ou 3.x) instalado.
 
 ```bash
-# Na raiz, use o dotnet watch para dev com Hot Reload
-dotnet watch run --project src/Web
+# Navegue até a pasta do painel web
+cd Src/WebRails
+
+# Instale as dependências (primeira vez)
+bundle install
+ruby bin/rails db:prepare
+
+# Rode o servidor
+ruby bin/rails server
 ```
 
-Ele deve abrir sozinho no link `http://localhost:5276` (ou porta parecida que o terminal te devolver).
+Ele deve ficar disponível no link `http://localhost:3000`.
 
 ---
 

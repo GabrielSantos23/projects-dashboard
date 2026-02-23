@@ -1,0 +1,18 @@
+source "https://rubygems.org"
+
+gem "rails", "~> 8.0"
+gem "sqlite3", "~> 2.0"
+gem "puma", "~> 6.0"
+gem "propshaft"
+gem "tailwindcss-rails"
+gem "turbo-rails"
+gem "stimulus-rails"
+gem "jbuilder"
+
+group :development do
+  gem "web-console"
+end
+
+gem "psych", "= 5.3.1"
+
+gem "tzinfo-data"

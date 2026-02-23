@@ -128,6 +128,10 @@ public class DashboardViewModel : ViewModelBase
             {
                 var tech = techGroups[i];
                 var share = totalTech > 0 ? (double)tech.Count / totalTech * 100 : 0;
+                var fileName = tech.Name.ToLowerInvariant() + ".svg";
+                var uri = new Uri($"avares://ProjectDashboard.Avalonia/Assets/svgs/{fileName}");
+                var svgPath = global::Avalonia.Platform.AssetLoader.Exists(uri) ? uri.ToString() : null;
+
                 TopTechs.Add(new TechStatDisplay
                 {
                     Name = tech.Name,
@@ -135,7 +139,8 @@ public class DashboardViewModel : ViewModelBase
                     Color = colors[i % colors.Length],
                     Share = $"{share:F1}%",
                     Initial = tech.Name.Length > 0 ? tech.Name[..1].ToUpper() : "?",
-                    Width = share
+                    Width = share,
+                    SvgPath = svgPath
                 });
             }
 
@@ -174,6 +179,10 @@ public class TechStatDisplay
     public string Share { get; set; } = "0%";
     public string Initial { get; set; } = "?";
     public double Width { get; set; }
+
+    public string? SvgPath { get; set; }
+    public bool HasSvg => !string.IsNullOrEmpty(SvgPath);
+    public bool ShowFallback => !HasSvg;
 }
 
 public class RelayCommand : ICommand

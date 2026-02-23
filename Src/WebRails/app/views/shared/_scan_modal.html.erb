@@ -1,0 +1,67 @@
+<div id="scan-modal" class="hidden fixed inset-0 z-50">
+  <div class="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onclick="closeScanModal()"></div>
+
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-[#1e1e20] rounded-2xl shadow-2xl w-full max-w-lg border border-[#2a2a2a] overflow-hidden" onclick="event.stopPropagation()">
+
+      <div class="px-6 py-5 border-b border-[#2a2a2a]">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-[#0088ff]/10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#0088ff]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" /></svg>
+            </div>
+            <div>
+              <h2 class="text-base font-semibold text-white">Scan Folders</h2>
+              <p class="text-xs text-[#8b8b90]">Choose which folders to scan for git repositories</p>
+            </div>
+          </div>
+          <button onclick="closeScanModal()" class="p-1.5 rounded-lg text-[#8b8b90] hover:text-white hover:bg-white/10 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="px-6 py-5">
+        <%= form_tag(add_folder_settings_path, method: :post, class: "flex gap-2 mb-5") do %>
+          <div class="relative flex-1">
+            <svg class="absolute left-3 top-2.5 w-4 h-4 text-[#5b5b60]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+            <%= text_field_tag :folder_path, nil, placeholder: 'Enter folder path, e.g. D:\projects', class: "w-full py-2 pl-9 pr-3 text-sm border border-[#2a2a2a] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0088ff]/20 focus:border-[#0088ff] transition-shadow text-white bg-[#161618] placeholder:text-[#5b5b60]" %>
+          </div>
+          <%= submit_tag "Add", class: "px-3.5 py-2 text-sm font-medium text-white bg-[#0088ff] rounded-lg hover:bg-[#0077ee] transition-colors shrink-0 cursor-pointer" %>
+        <% end %>
+
+        <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+          <% if defined?(@scan_folders) && @scan_folders.any? %>
+            <% @scan_folders.each do |folder| %>
+              <div class="flex items-center justify-between px-3 py-2.5 bg-[#161618] border border-[#2a2a2a] rounded-lg group hover:border-[#3a3a3a] transition-colors">
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                  <svg class="w-4 h-4 text-[#ffcc00] shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+                  <span class="text-sm text-[#d4d4d8] font-mono truncate"><%= folder.path %></span>
+                </div>
+                <%= button_to remove_folder_settings_path(folder_id: folder.id), method: :delete, class: "p-1 rounded text-[#5b5b60] hover:text-[#ff3b30] hover:bg-[#ff3b30]/10 transition-colors opacity-0 group-hover:opacity-100" do %>
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                <% end %>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="py-8 text-center">
+              <svg class="w-10 h-10 text-[#2a2a2a] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+              <p class="text-sm text-[#5b5b60]">No folders added yet</p>
+              <p class="text-xs text-[#5b5b60] mt-1">Add a folder path above to get started</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 bg-[#161618] border-t border-[#2a2a2a] flex items-center justify-between">
+        <p class="text-xs text-[#5b5b60]">
+          <%= defined?(@scan_folders) ? @scan_folders.count : 0 %> folder<%= (defined?(@scan_folders) ? @scan_folders.count : 0) == 1 ? "" : "s" %> configured
+        </p>
+        <div class="flex items-center gap-2">
+          <button onclick="closeScanModal()" class="px-4 py-2 text-sm font-medium text-[#d4d4d8] bg-[#2a2a2a] border border-[#3a3a3a] rounded-lg hover:bg-[#3a3a3a] transition-colors">Cancel</button>
+          <%= button_to "Start Scan", scans_path, method: :post, class: "px-4 py-2 text-sm font-medium text-white bg-[#0088ff] rounded-lg hover:bg-[#0077ee] shadow-[0_0_10px_rgba(0,136,255,0.3)] transition-colors flex items-center gap-2 cursor-pointer" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

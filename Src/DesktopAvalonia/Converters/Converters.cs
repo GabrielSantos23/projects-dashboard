@@ -37,14 +37,14 @@ public class StatusBgColorConverter : IValueConverter
         {
             return status switch
             {
-                "Active" => new SolidColorBrush(Color.Parse("#34c75920")),
-                "Recent" => new SolidColorBrush(Color.Parse("#0088ff20")),
-                "Stalled" => new SolidColorBrush(Color.Parse("#ffcc0020")),
-                "Archived" => new SolidColorBrush(Color.Parse("#8b8b9020")),
-                _ => new SolidColorBrush(Color.Parse("#8b8b9020"))
+                "Active" => new SolidColorBrush(Color.Parse("#1a34c759")),
+                "Recent" => new SolidColorBrush(Color.Parse("#1a0088ff")),
+                "Stalled" => new SolidColorBrush(Color.Parse("#1affcc00")),
+                "Archived" => new SolidColorBrush(Color.Parse("#1a8b8b90")),
+                _ => new SolidColorBrush(Color.Parse("#1a8b8b90"))
             };
         }
-        return new SolidColorBrush(Color.Parse("#8b8b9020"));
+        return new SolidColorBrush(Color.Parse("#1a8b8b90"));
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

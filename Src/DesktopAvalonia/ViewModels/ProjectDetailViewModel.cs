@@ -28,6 +28,7 @@ public class ProjectDetailViewModel : ViewModelBase
 
     public ObservableCollection<CommitInfo> RecentCommits { get; } = new();
     public ObservableCollection<string> ContributorNames { get; } = new();
+    public ObservableCollection<TechPillDisplay> TechPills { get; } = new();
 
     public string EditorName => _appState?.EditorName ?? "Cursor";
 
@@ -157,6 +158,27 @@ public class ProjectDetailViewModel : ViewModelBase
         {
             foreach (var name in cn.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
                 ContributorNames.Add(name);
+        }
+
+        TechPills.Clear();
+        if (Project.TechPills != null)
+        {
+            var colors = new[] { "#e53935", "#e65100", "#2e7d32", "#1565c0", "#6a1b9a", "#00838f", "#c62828", "#4527a0" };
+            var techPillsList = Project.TechPills.ToList();
+            for (int i = 0; i < techPillsList.Count; i++)
+            {
+                var pt = techPillsList[i];
+                var fileName = pt.ToLowerInvariant() + ".svg";
+                var uri = new Uri($"avares://ProjectDashboard.Avalonia/Assets/svgs/{fileName}");
+                var svgPath = global::Avalonia.Platform.AssetLoader.Exists(uri) ? uri.ToString() : null;
+
+                TechPills.Add(new TechPillDisplay
+                {
+                    Name = pt,
+                    Color = colors[i % colors.Length],
+                    SvgPath = svgPath
+                });
+            }
         }
 
         ShowDeleteModal = false;
@@ -304,4 +326,15 @@ public static class StringExtensions
 {
     public static string Initial(this string? value) => 
         !string.IsNullOrEmpty(value) && value.Length > 0 ? value[..1].ToUpper() : "?";
+}
+
+public class TechPillDisplay
+{
+    public string Name { get; set; } = "";
+    public string Color { get; set; } = "#0088ff";
+    public string Initial => Name.Length > 0 ? Name[..1].ToUpper() : "?";
+    
+    public string? SvgPath { get; set; }
+    public bool HasSvg => !string.IsNullOrEmpty(SvgPath);
+    public bool ShowFallback => !HasSvg;
 }

@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:ProjectDashboard.Avalonia.ViewModels"
+             xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
              x:Class="ProjectDashboard.Avalonia.Views.ProjectDetailView"
              x:DataType="vm:ProjectDetailViewModel">
@@ -44,9 +45,9 @@
             <StackPanel Orientation="Horizontal" Spacing="12">
               <TextBlock Text="{Binding Project.Name}" FontSize="24" FontWeight="Medium" Foreground="White"/>
               <Border Background="{Binding Project.Status, Converter={StaticResource StatusBgConverter}}" CornerRadius="4" Padding="6,2">
-                <StackPanel Orientation="Horizontal" Spacing="6">
-                  <Ellipse Width="6" Height="6" Fill="{Binding Project.Status, Converter={StaticResource StatusColorConverter}}"/>
-                  <TextBlock Text="{Binding Project.Status}" Foreground="{Binding Project.Status, Converter={StaticResource StatusColorConverter}}" FontSize="10" FontWeight="Bold"/>
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                  <Ellipse Width="6" Height="6" Fill="{Binding Project.Status, Converter={StaticResource StatusColorConverter}}" VerticalAlignment="Center"/>
+                  <TextBlock Text="{Binding Project.Status}" Foreground="{Binding Project.Status, Converter={StaticResource StatusColorConverter}}" FontSize="10" FontWeight="Bold" VerticalAlignment="Center"/>
                 </StackPanel>
               </Border>
             </StackPanel>
@@ -69,10 +70,10 @@
             <Border Classes="card" Padding="20">
               <StackPanel Spacing="16">
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                  <Path Width="14" Height="14" Stroke="#00E5FF" StrokeThickness="2" Data="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z"/>
+                  <Path Width="14" Height="14" Stroke="#5b5b60" StrokeThickness="2" Data="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z"/>
                   <TextBlock Classes="labelTiny" Text="INFERRED TECH STACK"/>
                 </StackPanel>
-                <ItemsControl ItemsSource="{Binding Project.TechPills}">
+                <ItemsControl ItemsSource="{Binding TechPills}">
                   <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                     <WrapPanel/>
@@ -80,8 +81,33 @@
                   </ItemsControl.ItemsPanel>
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                      <Border Classes="pill" Margin="0,0,8,8">
-                        <TextBlock Text="{Binding}" Foreground="#d4d4d8" FontSize="11" FontWeight="Medium"/>
+                      <Border CornerRadius="8" Padding="8" Margin="0,0,8,8" Background="Transparent" BorderBrush="#2a2a2a" BorderThickness="0"
+                              ToolTip.Tip="{Binding Name}">
+                        <Border.Transitions>
+                          <Transitions>
+                            <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                          </Transitions>
+                        </Border.Transitions>
+                        <Border.Styles>
+                          <Style Selector="Border:pointerover">
+                            <Setter Property="Background" Value="#1AFFFFFF"/>
+                          </Style>
+                        </Border.Styles>
+                        <StackPanel Orientation="Horizontal" Spacing="12" Background="Transparent" VerticalAlignment="Center">
+                          <!-- SVG Path -->
+                          <Panel Width="28" Height="28" IsVisible="{Binding HasSvg}">
+                            <svg:Svg Path="{Binding SvgPath}" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          </Panel>
+                          
+                          <!-- Fallback Initial Box -->
+                          <Border Width="28" Height="28" CornerRadius="8" Background="{Binding Color}" 
+                                  IsVisible="{Binding ShowFallback}">
+                            <TextBlock Text="{Binding Initial}" Foreground="White" FontSize="10" FontWeight="Bold" 
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          </Border>
+                          
+                          <TextBlock Text="{Binding Name}" Foreground="#d4d4d8" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                        </StackPanel>
                       </Border>
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
@@ -93,7 +119,7 @@
             <Border Classes="card" Padding="20">
               <StackPanel Spacing="16">
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                  <Path Width="14" Height="14" Stroke="#00E5FF" StrokeThickness="2" Data="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z M6 6h.008v.008H6V6z"/>
+                  <Path Width="14" Height="14" Stroke="#5b5b60" StrokeThickness="2" Data="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z M6 6h.008v.008H6V6z"/>
                   <TextBlock Classes="labelTiny" Text="TAGS"/>
                 </StackPanel>
                 <ItemsControl ItemsSource="{Binding Project.TagList}">
@@ -124,7 +150,7 @@
           <Border Grid.Column="1" Classes="card" Padding="20">
             <StackPanel Spacing="24">
               <StackPanel Orientation="Horizontal" Spacing="8">
-                <Path Width="14" Height="14" Stroke="#00E5FF" StrokeThickness="2" Data="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+                <Path Width="14" Height="14" Stroke="#5b5b60" StrokeThickness="2" Data="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
                 <TextBlock Classes="labelTiny" Text="RECENT ACTIVITY"/>
               </StackPanel>
 
@@ -168,7 +194,7 @@
             <Border Classes="card" Padding="20">
               <StackPanel Spacing="20">
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                  <Path Width="14" Height="14" Stroke="#00E5FF" StrokeThickness="2" Data="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
+                  <Path Width="14" Height="14" Stroke="#5b5b60" StrokeThickness="2" Data="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
                   <TextBlock Classes="labelTiny" Text="PROJECT HEALTH"/>
                 </StackPanel>
 
@@ -204,11 +230,29 @@
                     <TextBlock Grid.Column="0" Classes="labelTiny" Text="Last Scanned"/>
                     <TextBlock Grid.Column="1" Text="{Binding Project.ScannedAt}" Foreground="#d4d4d8" FontSize="12" FontWeight="Medium"/>
                   </Grid>
-                  <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Grid.Column="0" Classes="labelTiny" Text="Branch"/>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
-                      <Path Width="14" Height="14" Stroke="#5b5b60" StrokeThickness="2" Data="M7.5 15h2.25m8.024-9.75c.011.05.028.1.052.148.591 1.2.924 2.55.924 3.977a8.96 8.96 0 01-.999 4.125m.023-8.25c-.076-.365.183-.75.575-.75h.908c.889 0 1.713.518 1.972 1.368.339 1.11.521 2.287.521 3.507 0 1.553-.295 3.036-.831 4.398C20.613 14.547 19.833 15 19 15h-1.053c-.472 0-.745-.556-.5-.96a8.95 8.95 0 00.303-.54m.023-8.25H16.48a4.5 4.5 0 01-1.423-.23l-3.114-1.04a4.5 4.5 0 00-1.423-.23H6.504c-.351 0-.674.244-.738.59-.064.346.12.684.453.842M5.25 15h13.5"/>
-                      <TextBlock Text="{Binding Project.CurrentBranch}" Foreground="#d4d4d8" FontSize="12" FontWeight="Medium"/>
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0"
+                              Classes="labelTiny"
+                              Text="Branch"/>
+
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                Spacing="6"
+                                VerticalAlignment="Center">
+
+                      <Viewbox Width="14" Height="14">
+                        <Canvas Width="24" Height="24">
+                          <Path Data="M15 6a9 9 0 0 0-9 9V3" Stroke="#5b5b60" StrokeThickness="2" />
+                          <Ellipse Canvas.Left="15" Canvas.Top="3" Width="6" Height="6" Stroke="#5b5b60" StrokeThickness="2" Fill="Transparent" />
+                          <Ellipse Canvas.Left="3" Canvas.Top="15" Width="6" Height="6" Stroke="#5b5b60" StrokeThickness="2" Fill="Transparent" />
+                        </Canvas>
+                      </Viewbox>
+
+                      <TextBlock Text="{Binding Project.CurrentBranch}"
+                                Foreground="#d4d4d8"
+                                FontSize="12"
+                                FontWeight="Medium"/>
+
                     </StackPanel>
                   </Grid>
                   <Grid ColumnDefinitions="*,Auto">

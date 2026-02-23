@@ -1,0 +1,180 @@
+<% content_for(:title) { "Project Dashboard" } %>
+
+<div class="min-h-screen text-[#d4d4d8] p-6 lg:p-8 font-sans" style="background-color: #1a1a1a;">
+
+  <div class="flex items-center justify-between mb-8 text-[13px]">
+    <div class="flex items-center text-[#8b8b90] gap-2">
+      <span>General</span>
+      <span>/</span>
+      <span class="text-[#d4d4d8]">All Projects</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="w-8 h-8 rounded-md bg-[#161616] border border-[#3a3a3a] flex items-center justify-center hover:bg-[#262626] transition-colors">
+        <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      </button>
+      <%= link_to root_path, class: "px-3 h-8 rounded-md bg-[#161616] border border-[#3a3a3a] flex items-center gap-2 hover:bg-[#262626] transition-colors" do %>
+        <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        <span class="opacity-90">Refresh</span>
+      <% end %>
+      <button class="px-3 h-8 rounded-md bg-[#161616] border border-[#3a3a3a] flex items-center gap-2 hover:bg-[#262626] transition-colors">
+        <svg class="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+        <span class="opacity-90">Filter</span>
+      </button>
+      <button onclick="openScanModal()" class="px-4 h-8 rounded-md bg-[#0088ff] hover:bg-[#0077ee] text-white flex items-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(0,136,255,0.3)] font-medium">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <span>Scan Projects</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mb-6 flex items-center justify-between">
+    <h1 class="text-xl font-medium tracking-wide text-white">Project Dashboard</h1>
+  </div>
+
+  <div class="grid grid-cols-4 gap-4 mb-4">
+    <div class="bg-[#161616] border border-[#2a2a2a] rounded-xl p-4 flex flex-col justify-between h-28 hover:bg-[#262626] transition-colors cursor-default">
+      <div class="flex items-center gap-2 text-[11px] text-[#8b8b90] font-medium tracking-wide">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        TOTAL PROJECTS
+      </div>
+      <div class="text-[28px] font-medium text-white tracking-tight"><%= @total_count %></div>
+      <div class="flex items-center justify-between text-[11px] font-medium">
+        <span class="text-[#8b8b90]">all repositories</span>
+      </div>
+    </div>
+
+    <div class="bg-[#161616] border border-[#2a2a2a] rounded-xl p-4 flex flex-col justify-between h-28 hover:bg-[#262626] transition-colors cursor-default">
+      <div class="flex items-center gap-2 text-[11px] text-[#8b8b90] font-medium tracking-wide">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        ACTIVE THIS WEEK
+      </div>
+      <div class="text-[28px] font-medium text-white tracking-tight"><%= @active_count %></div>
+      <div class="flex items-center justify-between text-[11px] font-medium">
+        <span class="text-[#8b8b90]">last 7 days</span>
+        <span class="text-[#34c759]"><%= @active_count > 0 ? "●" : "" %></span>
+      </div>
+    </div>
+
+    <div class="bg-[#161616] border border-[#2a2a2a] rounded-xl p-4 flex flex-col justify-between h-28 hover:bg-[#262626] transition-colors cursor-default">
+      <div class="flex items-center gap-2 text-[11px] text-[#8b8b90] font-medium tracking-wide">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        STALLED
+      </div>
+      <div class="text-[28px] font-medium text-white tracking-tight"><%= @stalled_count %></div>
+      <div class="flex items-center justify-between text-[11px] font-medium">
+        <span class="text-[#8b8b90]">no commits 30d+</span>
+        <span class="text-[#ffcc00]"><%= @stalled_count > 0 ? "●" : "" %></span>
+      </div>
+    </div>
+
+    <div class="bg-[#161616] border border-[#2a2a2a] rounded-xl p-4 flex flex-col justify-between h-28 hover:bg-[#262626] transition-colors cursor-default">
+      <div class="flex items-center gap-2 text-[11px] text-[#8b8b90] font-medium tracking-wide">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+        ARCHIVED
+      </div>
+      <div class="text-[28px] font-medium text-white tracking-tight"><%= @archived_count %></div>
+      <div class="flex items-center justify-between text-[11px] font-medium">
+        <span class="text-[#8b8b90]">90d+ inactive</span>
+      </div>
+    </div>
+  </div>
+
+  <% if @top_techs.any? %>
+  <div class="grid grid-cols-1 gap-4">
+    <div class="bg-[#161616] border border-[#2a2a2a] rounded-xl p-5 flex flex-col hover:bg-[#262626] transition-colors">
+      <div class="mb-5">
+        <div class="text-[11px] text-[#8b8b90] font-medium mb-1">Top Technologies</div>
+        <div class="text-xl font-medium text-white flex items-center gap-2">
+          #1 <%= @top_techs.first[:name] %>
+        </div>
+      </div>
+
+      <div class="flex h-1.5 w-full rounded-full overflow-hidden mb-6 gap-1">
+        <% @top_techs.each_with_index do |tech, i| %>
+          <% basis = @total_tech_count > 0 ? (tech[:count].to_f / @total_tech_count * 100) : 0 %>
+          <div style="flex-basis: <%= basis %>%; background-color: <%= tech_color(i) %>;" class="h-full rounded-full"></div>
+        <% end %>
+      </div>
+
+      <div class="flex gap-4 mb-4 text-[10px] font-bold text-[#8b8b90]">
+        <% @top_techs.each_with_index do |tech, i| %>
+          <div class="flex items-center gap-1.5 group cursor-default">
+            <div class="w-1.5 h-1.5 rounded-full group-hover:scale-150 transition-transform" style="background-color: <%= tech_color(i) %>;"></div>
+            <span class="text-[#d4d4d8]"><%= tech[:name] %></span>
+          </div>
+        <% end %>
+      </div>
+
+      <table class="w-full text-left mt-2">
+        <thead>
+          <tr class="text-[10px] text-[#5b5b60] font-bold border-b border-[#2a2a2a]">
+            <th class="pb-2 font-medium">Technology</th>
+            <th class="pb-2 font-medium text-right">Share</th>
+            <th class="pb-2 font-medium text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody class="text-[12px]">
+          <% @top_techs.each_with_index do |tech, i| %>
+            <% share = @total_tech_count > 0 ? (tech[:count].to_f / @total_tech_count * 100).round(1) : 0 %>
+            <tr class="border-b border-[#2a2a2a]/50 hover:bg-white/5 transition-colors">
+              <td class="py-2.5 flex items-center gap-2">
+                <% if svg = tech_icon_svg(tech[:name]) %>
+                  <div class="w-4 h-4 flex items-center justify-center [&>svg]:w-3.5 [&>svg]:h-3.5">
+                    <%= svg %>
+                  </div>
+                <% else %>
+                  <div class="w-4 h-4 rounded text-white flex items-center justify-center text-[8px] font-bold" style="background-color: <%= tech_color(i) %>;"><%= tech[:name][0].upcase %></div>
+                <% end %>
+                <span><%= tech[:name] %></span>
+              </td>
+              <td class="py-2.5 text-right font-medium"><%= share %>%</td>
+              <td class="py-2.5 text-right text-white"><%= tech[:count] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% end %>
+
+  <div class="mt-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-medium text-white">All Projects</h2>
+      <div class="relative">
+        <svg class="absolute left-3 top-2.5 w-3.5 h-3.5 text-[#5b5b60]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5-5m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <%= form_tag(root_path, method: :get, class: "inline") do %>
+          <%= text_field_tag :q, @search_query, placeholder: "Search by name...", class: "w-64 bg-[#161616] border border-[#2a2a2a] rounded-md text-[13px] text-white py-1.5 pl-9 pr-3 focus:outline-none focus:border-[#0088ff] transition-colors", oninput: "this.form.requestSubmit()" %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="bg-[#161616] border border-[#2a2a2a] rounded-xl overflow-hidden">
+      <table class="w-full text-left whitespace-nowrap">
+        <thead>
+          <tr class="text-[10px] font-bold text-[#6b6b70] uppercase tracking-wider border-b border-[#2a2a2a] bg-[#111111]">
+            <th class="px-5 py-3">Project</th>
+            <th class="px-5 py-3">Status</th>
+            <th class="px-5 py-3">Last Activity</th>
+          </tr>
+        </thead>
+        <tbody class="text-[13px]">
+          <% @filtered_projects.first(8).each do |p| %>
+            <tr class="border-b border-[#2a2a2a]/50 hover:bg-white/5 transition-colors cursor-pointer" onclick="window.location='/projects/<%= p.id %>'">
+              <td class="px-5 py-3.5 font-medium text-[#d4d4d8]"><%= p.name %></td>
+              <td class="px-5 py-3.5">
+                <span class="<%= status_classes(p.status) %> inline-flex items-center px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide">
+                  <span class="w-1.5 h-1.5 rounded-full mr-1.5" style="background-color: currentColor;"></span>
+                  <%= p.status %>
+                </span>
+              </td>
+              <td class="px-5 py-3.5 text-[#8b8b90]"><%= p.time_ago %></td>
+            </tr>
+          <% end %>
+          <% if @filtered_projects.empty? %>
+            <tr><td colspan="3" class="px-5 py-8 text-center text-[#5b5b60] italic">No projects found.</td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -126,7 +126,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         NavProjectsBadge.IsVisible = !isSidebarCollapsed;
         NavActivityText.IsVisible = !isSidebarCollapsed;
         FavoritesText.IsVisible = !isSidebarCollapsed;
-        FavoritesList.IsVisible = !isSidebarCollapsed;
         NoFavoritesText.IsVisible = !isSidebarCollapsed && !HasPinnedProjects;
         NavSettingsText.IsVisible = !isSidebarCollapsed;
 

@@ -1,0 +1,77 @@
+<% content_for(:title) { "Recent Activity" } %>
+
+<div class="min-h-screen text-[#d4d4d8] p-6 lg:p-8 font-sans" style="background-color: #1a1a1a;">
+  <div class="flex items-center justify-between mb-8 text-[13px]">
+    <div class="flex items-center text-[#8b8b90] gap-2">
+      <span>General</span><span>/</span>
+      <span class="text-[#d4d4d8]">Recent Activity</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <%= link_to activity_path, class: "px-3 h-8 rounded-md bg-[#161616] border border-[#3a3a3a] flex items-center gap-2 hover:bg-[#262626] transition-colors" do %>
+        <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        <span class="opacity-90">Refresh</span>
+      <% end %>
+      <button onclick="openScanModal()" class="px-4 h-8 rounded-md bg-[#0088ff] hover:bg-[#0077ee] text-white flex items-center gap-1.5 transition-colors shadow-[0_0_10px_rgba(0,136,255,0.3)] font-medium">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <span>Scan Projects</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mb-6 flex items-center justify-between border-b border-[#2a2a2a] pb-6">
+    <div>
+      <h1 class="text-2xl font-medium tracking-wide text-white">Recent Activity</h1>
+      <p class="text-[13px] text-[#8b8b90] mt-1">Track the latest commits and code changes across all projects.</p>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-medium text-white">Latest Code Updates</h2>
+      <div class="relative">
+        <svg class="absolute left-3 top-2.5 w-3.5 h-3.5 text-[#5b5b60]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5-5m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <%= form_tag(activity_path, method: :get, class: "inline") do %>
+          <%= text_field_tag :q, @search_query, placeholder: "Filter activity...", class: "w-64 bg-[#161616] border border-[#2a2a2a] rounded-md text-[13px] text-white py-1.5 pl-9 pr-3 focus:outline-none focus:border-[#0088ff] transition-colors", oninput: "this.form.requestSubmit()" %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="bg-[#161616] border border-[#2a2a2a] rounded-xl overflow-hidden shadow-sm">
+      <table class="w-full text-left whitespace-nowrap">
+        <thead>
+          <tr class="text-[10px] font-bold text-[#6b6b70] uppercase tracking-wider border-b border-[#2a2a2a] bg-[#111111]">
+            <th class="px-5 py-3">Project</th>
+            <th class="px-5 py-3 text-center">Branch</th>
+            <th class="px-5 py-3 text-center">Status</th>
+            <th class="px-5 py-3">Latest Action</th>
+            <th class="px-5 py-3 text-right">Time</th>
+          </tr>
+        </thead>
+        <tbody class="text-[13px]">
+          <% @filtered_projects.each do |p| %>
+            <tr class="border-b border-[#2a2a2a]/50 hover:bg-white/5 transition-colors cursor-pointer group" onclick="window.location='/projects/<%= p.id %>'">
+              <td class="px-5 py-3.5 font-medium text-[#d4d4d8] flex items-center gap-3">
+                <div class="w-2.5 h-2.5 rounded-full bg-[#0088ff] shadow-[0_0_8px_rgba(0,136,255,0.4)] transition-all group-hover:scale-125"></div>
+                <%= p.name %>
+              </td>
+              <td class="px-5 py-3.5 text-center text-[#00E5FF] font-mono text-[11px] tracking-tight">
+                <span class="bg-[#00E5FF]/10 border border-[#00E5FF]/20 px-2 py-0.5 rounded"><%= p.current_branch || "main" %></span>
+              </td>
+              <td class="px-5 py-3.5 text-center">
+                <span class="<%= status_classes(p.status) %> inline-flex items-center px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide">
+                  <span class="w-1.5 h-1.5 rounded-full mr-1.5" style="background-color: currentColor;"></span>
+                  <%= p.status %>
+                </span>
+              </td>
+              <td class="px-5 py-3.5 text-[#5b5b60] truncate max-w-[300px]">Commit updated in directory</td>
+              <td class="px-5 py-3.5 text-[#8b8b90] font-medium text-right"><%= p.time_ago %></td>
+            </tr>
+          <% end %>
+          <% if @filtered_projects.empty? %>
+            <tr><td colspan="5" class="px-5 py-8 text-center text-[#5b5b60] italic">No recent activity found.</td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

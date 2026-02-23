@@ -38,6 +38,9 @@ public class ScannerService
         using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         var foundPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        // Load existing projects completely into memory to ensure flawless path alignment
+        var allDbProjects = await dbContext.Projects.ToListAsync();
+
         foreach (var gitDir in gitFolders)
         {
             try
@@ -50,16 +53,27 @@ public class ScannerService
                 var lastCommitDate = lastCommit?.Author.When.UtcDateTime;
                 if (lastCommitDate < cutoffDate) continue;
 
-                var parentDir = Directory.GetParent(gitDir)?.FullName ?? gitDir;
-                var projectName = new DirectoryInfo(parentDir).Name;
+                var realDir = Directory.GetParent(gitDir)?.FullName ?? gitDir;
+                var normalizedPath = Path.GetFullPath(realDir).Replace('\\', '/').ToLowerInvariant();
+                var projectName = new DirectoryInfo(realDir).Name;
 
-                foundPaths.Add(parentDir);
+                System.IO.File.AppendAllText("scan_log.txt", $"Processing: {normalizedPath}\n");
 
-                var project = await dbContext.Projects.FirstOrDefaultAsync(p => p.Path == parentDir);
+                foundPaths.Add(normalizedPath);
+
+                // Safe, normalized in-memory matching to upgrade legacy SQLite paths
+                var project = allDbProjects.FirstOrDefault(p => p.Path.Replace('\\', '/').ToLowerInvariant() == normalizedPath);
+                
                 if (project == null)
                 {
-                    project = new Project { Path = parentDir };
+                    project = new Project { Path = normalizedPath };
                     dbContext.Projects.Add(project);
+                    allDbProjects.Add(project);
+                }
+                else
+                {
+                    // Upgrade legacy path format natively
+                    project.Path = normalizedPath;
                 }
 
                 project.Name = projectName;
@@ -77,18 +91,19 @@ public class ScannerService
 
                 
                 var metadata = project.Metadata;
-                metadata["inferred_type"] = DetectPrimaryStack(parentDir);
+                metadata["inferred_type"] = DetectPrimaryStack(realDir);
 
-                var techs = DetectAllTechs(parentDir);
+                var techs = DetectAllTechs(realDir);
                 metadata["techs"] = string.Join(",", techs);
 
                 
                 var contributors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 var commitCount = 0;
+                // Faster counting without full enumeration
+                try { commitCount = repo.Commits.Count(); } catch { }
                 foreach (var c in repo.Commits.Take(500))
                 {
                     contributors.Add(c.Author.Name);
-                    commitCount++;
                 }
                 metadata["contributors"] = contributors.Count.ToString();
                 metadata["contributor_names"] = string.Join(",", contributors.Take(20));
@@ -106,26 +121,27 @@ public class ScannerService
                 metadata["recent_commits"] = string.Join(";;", recentCommits);
 
                 
-                var docs = ListDocs(parentDir);
+                var docs = ListDocs(realDir);
                 metadata["doc_count"] = docs.Count.ToString();
                 metadata["doc_files"] = string.Join(",", docs.Take(50));
 
                 
-                metadata["has_dockerfile"] = (File.Exists(Path.Combine(parentDir, "Dockerfile")) ||
-                    File.Exists(Path.Combine(parentDir, "docker-compose.yml")) ||
-                    File.Exists(Path.Combine(parentDir, "docker-compose.yaml"))).ToString();
-                metadata["has_ci"] = (Directory.Exists(Path.Combine(parentDir, ".github", "workflows")) ||
-                    File.Exists(Path.Combine(parentDir, ".gitlab-ci.yml")) ||
-                    File.Exists(Path.Combine(parentDir, "Jenkinsfile"))).ToString();
-                metadata["has_readme"] = File.Exists(Path.Combine(parentDir, "README.md")).ToString();
-                metadata["has_license"] = (File.Exists(Path.Combine(parentDir, "LICENSE")) ||
-                    File.Exists(Path.Combine(parentDir, "LICENSE.md"))).ToString();
+                metadata["has_dockerfile"] = (File.Exists(Path.Combine(realDir, "Dockerfile")) ||
+                    File.Exists(Path.Combine(realDir, "docker-compose.yml")) ||
+                    File.Exists(Path.Combine(realDir, "docker-compose.yaml"))).ToString();
+                metadata["has_ci"] = (Directory.Exists(Path.Combine(realDir, ".github", "workflows")) ||
+                    File.Exists(Path.Combine(realDir, ".gitlab-ci.yml")) ||
+                    File.Exists(Path.Combine(realDir, "Jenkinsfile"))).ToString();
+                metadata["has_readme"] = File.Exists(Path.Combine(realDir, "README.md")).ToString();
+                metadata["has_license"] = (File.Exists(Path.Combine(realDir, "LICENSE")) ||
+                    File.Exists(Path.Combine(realDir, "LICENSE.md"))).ToString();
 
                 project.Metadata = metadata;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to process repository at {GitDir}", gitDir);
+                System.IO.File.AppendAllText("scan_log.txt", $"ERROR {gitDir}: {ex.Message}\n{ex.StackTrace}\n");
             }
         }
 
@@ -138,11 +154,11 @@ public class ScannerService
         var dirs = new Queue<string>();
         dirs.Enqueue(startLocation);
         var repos = new List<string>();
+        var options = new EnumerationOptions { IgnoreInaccessible = true, RecurseSubdirectories = false };
 
         while (dirs.Count > 0)
         {
             var currentDir = dirs.Dequeue();
-
             try
             {
                 var potentialGitFolder = Path.Combine(currentDir, ".git");
@@ -152,14 +168,14 @@ public class ScannerService
                     continue;
                 }
 
-                foreach (var subDir in Directory.GetDirectories(currentDir))
+                foreach (var subDir in Directory.EnumerateDirectories(currentDir, "*", options))
                 {
-                    var dirName = new DirectoryInfo(subDir).Name;
+                    var dirName = Path.GetFileName(subDir);
                     if (IsIgnoredDirectory(dirName)) continue;
                     dirs.Enqueue(subDir);
                 }
             }
-            catch (UnauthorizedAccessException) { }
+            catch { }
         }
 
         return repos;
@@ -186,47 +202,86 @@ public class ScannerService
     private List<string> DetectAllTechs(string projectPath)
     {
         var techs = new List<string>();
+        var allFiles = new List<string>();
 
-        if (File.Exists(Path.Combine(projectPath, "Gemfile")))
+        try
+        {
+            var process = new System.Diagnostics.Process();
+            process.StartInfo.FileName = "git";
+            process.StartInfo.Arguments = "ls-files --cached --others --exclude-standard";
+            process.StartInfo.WorkingDirectory = projectPath;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+            process.Start();
+
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+
+            allFiles = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                             .Select(f => f.Trim()).ToList();
+        }
+        catch
+        {
+            allFiles = new List<string>();
+        }
+
+        var extensions = allFiles.Select(f => Path.GetExtension(f).ToLowerInvariant()).Distinct().ToList();
+        var basenames = allFiles.Select(f => Path.GetFileName(f).ToLowerInvariant()).Distinct().ToList();
+
+        if (basenames.Contains("gemfile"))
         {
             techs.Add("Ruby");
             try
             {
-                var gemContent = File.ReadAllText(Path.Combine(projectPath, "Gemfile"));
-                if (gemContent.Contains("rails")) techs.Add("Rails");
+                var pkgPath = Path.Combine(projectPath, allFiles.First(f => Path.GetFileName(f).ToLowerInvariant() == "gemfile"));
+                if (File.ReadAllText(pkgPath).Contains("rails")) techs.Add("Rails");
             }
             catch { }
         }
-        if (Directory.GetFiles(projectPath, "*.csproj").Any()) techs.Add(".NET");
-        if (File.Exists(Path.Combine(projectPath, "go.mod"))) techs.Add("Go");
-        if (File.Exists(Path.Combine(projectPath, "pom.xml"))) techs.Add("Java");
-        if (File.Exists(Path.Combine(projectPath, "Cargo.toml"))) techs.Add("Rust");
-        if (File.Exists(Path.Combine(projectPath, "requirements.txt")) || File.Exists(Path.Combine(projectPath, "pyproject.toml"))) techs.Add("Python");
 
-        if (File.Exists(Path.Combine(projectPath, "package.json")))
+        if (extensions.Contains(".rb")) techs.Add("Ruby");
+        if (extensions.Contains(".cs") || basenames.Any(f => f.EndsWith(".csproj"))) techs.Add("C#");
+        if (basenames.Any(f => f.EndsWith(".csproj") || f.EndsWith(".sln"))) techs.Add(".NET");
+        if (extensions.Contains(".go") || basenames.Contains("go.mod")) techs.Add("Go");
+        if (extensions.Contains(".java") || basenames.Contains("pom.xml") || basenames.Contains("build.gradle")) techs.Add("Java");
+        if (extensions.Contains(".rs") || basenames.Contains("cargo.toml")) techs.Add("Rust");
+        if (extensions.Contains(".py") || basenames.Contains("requirements.txt") || basenames.Contains("pyproject.toml")) techs.Add("Python");
+        
+        if (extensions.Contains(".html") || extensions.Contains(".htm")) techs.Add("HTML");
+        if (extensions.Contains(".css") || extensions.Contains(".scss") || extensions.Contains(".sass")) techs.Add("CSS");
+        if (extensions.Contains(".php")) techs.Add("PHP");
+        if (extensions.Contains(".lua")) techs.Add("Lua");
+        if (extensions.Contains(".c") || (extensions.Contains(".h") && !extensions.Contains(".cpp") && !extensions.Contains(".cxx"))) techs.Add("C");
+        if (extensions.Contains(".cpp") || extensions.Contains(".hpp") || extensions.Contains(".cxx") || extensions.Contains(".cc")) techs.Add("C++");
+
+        if (basenames.Contains("package.json"))
         {
             try
             {
-                var pkgContent = File.ReadAllText(Path.Combine(projectPath, "package.json"));
+                var pkgPath = Path.Combine(projectPath, allFiles.First(f => Path.GetFileName(f).ToLowerInvariant() == "package.json"));
+                var pkgContent = File.ReadAllText(pkgPath);
                 if (pkgContent.Contains("\"react\"")) techs.Add("React");
-                else if (pkgContent.Contains("\"vue\"")) techs.Add("Vue");
-                else if (pkgContent.Contains("\"svelte\"")) techs.Add("Svelte");
-                else if (pkgContent.Contains("\"next\"")) techs.Add("Next.js");
-                else if (pkgContent.Contains("\"angular\"")) techs.Add("Angular");
+                if (pkgContent.Contains("\"vue\"")) techs.Add("Vue");
+                if (pkgContent.Contains("\"svelte\"")) techs.Add("Svelte");
+                if (pkgContent.Contains("\"next\"")) techs.Add("Next.js");
+                if (pkgContent.Contains("\"angular\"")) techs.Add("Angular");
 
-                if (pkgContent.Contains("\"typescript\"") || File.Exists(Path.Combine(projectPath, "tsconfig.json"))) techs.Add("TypeScript");
-                else techs.Add("JavaScript");
+                if (pkgContent.Contains("\"typescript\"") || basenames.Contains("tsconfig.json")) techs.Add("TypeScript");
 
                 if (pkgContent.Contains("\"electron\"")) techs.Add("Electron");
                 if (pkgContent.Contains("\"tailwindcss\"")) techs.Add("Tailwind");
             }
-            catch { if (!techs.Contains("JavaScript")) techs.Add("JavaScript"); }
+            catch { }
         }
 
-        if (File.Exists(Path.Combine(projectPath, "Dockerfile")) || File.Exists(Path.Combine(projectPath, "docker-compose.yml")) || File.Exists(Path.Combine(projectPath, "docker-compose.yaml")))
+        if (extensions.Contains(".ts") || extensions.Contains(".tsx")) techs.Add("TypeScript");
+        if (extensions.Contains(".js") || extensions.Contains(".jsx")) techs.Add("JavaScript");
+
+        if (basenames.Contains("dockerfile") || basenames.Contains("docker-compose.yml") || basenames.Contains("docker-compose.yaml"))
             techs.Add("Docker");
 
-        return techs;
+        return techs.Distinct().ToList();
     }
 
     private List<string> ListDocs(string projectPath)
@@ -234,21 +289,22 @@ public class ScannerService
         var docs = new List<string>();
         var dirs = new Queue<string>();
         dirs.Enqueue(projectPath);
+        var options = new EnumerationOptions { IgnoreInaccessible = true, RecurseSubdirectories = false };
 
         while (dirs.Count > 0)
         {
             var current = dirs.Dequeue();
             try
             {
-                foreach (var file in Directory.GetFiles(current, "*.md"))
+                foreach (var file in Directory.EnumerateFiles(current, "*.md", options))
                 {
                     docs.Add(System.IO.Path.GetRelativePath(projectPath, file));
                 }
 
-                foreach (var dir in Directory.GetDirectories(current))
+                foreach (var dir in Directory.EnumerateDirectories(current, "*", options))
                 {
-                    var name = new DirectoryInfo(dir).Name.ToLower();
-                    if (name is "node_modules" or "bin" or "obj" or ".git" or "packages" or "dist" or "build" or "venv" or ".venv") continue;
+                    var name = Path.GetFileName(dir).ToLowerInvariant();
+                    if (name is "node_modules" or "bin" or "obj" or ".git" or "packages" or "dist" or "build" or "venv" or ".venv" or ".vs" or "target" or "out") continue;
                     dirs.Enqueue(dir);
                 }
             }

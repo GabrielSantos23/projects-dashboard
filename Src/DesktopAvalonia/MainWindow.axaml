@@ -16,7 +16,7 @@
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="-1"
         Width="1280" Height="800"
-        MinWidth="900" MinHeight="600"
+        MinWidth="1200" MinHeight="600"
         x:DataType="local:MainWindow">
 
 
@@ -105,18 +105,25 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="models:Project">
                                         <Button Classes="sidebarItem" Click="Favorite_Click" Tag="{Binding Id}">
-                                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                                <Border Width="16" Height="16" CornerRadius="8">
-                                                    <Border.Background>
-                                                        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-                                                            <GradientStop Color="#6366f1" Offset="0"/>
-                                                            <GradientStop Color="#a855f7" Offset="1"/>
-                                                        </LinearGradientBrush>
-                                                    </Border.Background>
-                                                    <TextBlock Text="{Binding Name, Converter={StaticResource StringInitialConverter}}" FontSize="8" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                <Border Grid.Column="0" Width="16"
+                                                        Height="16"
+                                                        CornerRadius="8"
+                                                        Background="#5b5b60">
+                                                    
+                                                    <TextBlock Text="{Binding Name, Converter={StaticResource StringInitialConverter}}"
+                                                            FontSize="8"
+                                                            FontWeight="Bold"
+                                                            Foreground="White"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"/>
                                                 </Border>
-                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="12.5" TextTrimming="CharacterEllipsis" MaxWidth="140"/>
-                                            </StackPanel>
+
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                                        VerticalAlignment="Center"
+                                                        FontSize="12.5"
+                                                        TextTrimming="CharacterEllipsis"/>
+                                            </Grid>
                                         </Button>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
