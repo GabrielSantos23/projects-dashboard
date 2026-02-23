@@ -1,85 +1,116 @@
-# Project Dashboard 🚀
+# Project Dashboard
 
 ![Capa do Project Dashboard](capa.png)
 
-O **Project Dashboard** é uma ferramenta poderosa para te ajudar a organizar, rastrear e gerenciar todos os projetos de código (repositórios Git) que ficam espalhados pelo seu computador.
+O **Project Dashboard** é uma aplicação criada para organizar e acompanhar todos os seus projetos Git que ficam espalhados pelo computador.
 
-Sabe quando você tem dezenas de pastas com testes, projetos antigos, repositórios de clientes, e acaba perdendo a noção do que tem ali? Esse dashboard resolve isso fazendo um scan nas suas pastas e montando um painel bonito e interativo com tudo o que ele encontra.
+Se organize com todas as pastas de projetos, versões antigas, freelas, projetos de estudo, centralize tudo em um único lugar. O aplicativo scaneia as pastas que você escolher e mostra todos os repositórios encontrados.
 
 ---
 
 [![Download for Windows](https://img.shields.io/badge/Download_for-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/GabrielSantos23/projects-dashboard/releases/latest)
 
-## ✨ O que ele faz?
+## O que ele faz?
 
-- 🔍 **Auto-Scan de Repositórios**: Você diz em quais pastas seus projetos costumam ficar (ex: `D:\projects`), ele varre os diretórios procurando tudo que tem `.git` e indexa pra você automaticamente.
-- 📊 **Metadados Ricos**: O scan vai além do básico. Ele conta os commits, lista os contribuidores, puxa as últimas mensagens de commit, conta branches e rastreia atividades recentes.
-- 🛠️ **Reconhecimento de Tech Stack**: Ele lê arquivos como `package.json`, `Dockerfile`, `.csproj`, etc., e deduz quais tecnologias você usou no projeto (ex: React, Node, Docker, C#, Python), criando tags automáticas.
-- 📝 **Anotações e Organização**: Cada projeto tem uma página de detalhes onde você pode criar tags manuais, fixar (pinar) seus projetos favoritos, e até mesmo commitar e enviar alterações (push) pro Git diretamente da interface.
-- 💻 **Web & Desktop**: Dá pra rodar via navegador ou como um app Windows nativo.
-- 🔄 **Auto-Updates**: A versão Desktop verifica atualizações automaticamente e baixa as novas versões direto do GitHub.
+- **Scan automático de repositórios**
+  Você informa as pastas onde costuma guardar seus projetos, o app procura os diretórios e busca pastas com `.git` e lista tudo automaticamente.
+
+- **Leitura de metadados do Git**
+  Para cada projeto encontrado, o app pega informações como número de commits, contribuidores, últimos commits, branches e atividade recente.
+
+- **Reconhecimento de tecnologias**
+  O sistema analisa arquivos como `package.json`, `Dockerfile`, `.csproj`, etc para identificar quais tecnologias estão sendo usadas e cria tags automaticamente.
+
+- **Organização e anotações**
+  Cada projeto tem uma página de detalhes onde você pode adicionar tags manuais, fixar projetos importantes e realizar ações como stage, commit e push.
+
+- **Versão Web e Desktop**
+  Você pode usar pelo navegador ou como aplicativo nativo no Windows.
+
+- **Atualizações automáticas**
+  A versão Desktop verifica versões no GitHub e atualiza automaticamente.
 
 ---
 
-## 🚀 Como Instalar e Rodar
+## Tecnologias Usadas
 
-Você pode usar o Project Dashboard de três formas: baixando o executável pronto, compilando o App Desktop, ou rodando a versão Web.
+| Tecnologia                | Descrição                                                                          | Onde é usado      |
+| :------------------------ | :--------------------------------------------------------------------------------- | :---------------- |
+| **.NET 9 / C#**           | Linguagem e Framework do sistema                                                   | App Desktop       |
+| **Avalonia UI**           | Framework de interface (XAML)                                                      | App Desktop       |
+| **Entity Framework Core** | ORM para o acesso a dados locais                                                   | App Desktop       |
+| **LibGit2Sharp**          | Integração C# com a biblioteca para leitura de repositórios                        | App Desktop       |
+| **SQLite**                | Banco de dados local                                                               | App Web & Desktop |
+| **Ruby on Rails**         | Framework Web estruturado em MVC.                                                  | App Web           |
+| **Tailwind CSS**          | Framework de estilização na web.                                                   | App Web           |
+| **GitHub Actions**        | Scripts de pipeline que automatizam o processo inteiro de build e update contínuo. | Infra             |
 
-### 1. Baixar o Release Pronto (Método Mais Fácil)
+---
 
-Se você está no Windows e quer apenas usar o aplicativo sem instalar nenhuma dependência:
+## Como instalar e rodar
 
-1. Vá até a página de [Releases](https://github.com/GabrielSantos23/projects-dashboard/releases) deste repositório.
-2. Baixe o arquivo `ProjectDashboard.Avalonia.exe` mais recente ou o formato `ProjectDashboard-win-x64.zip`.
-3. Rode o arquivo `.exe`!
-4. O app é totalmente autossuficiente, você não precisa nem instalar o .NET para rodá-lo. Além disso, o app vai se auto-atualizar quando novas versões forem lançadas.
+Você pode usar o Project Dashboard de três formas: baixando o app pronto, compilando o app Desktop ou rodando a versão web.
 
-### 2. Rodar o App Desktop Avalonia (Pelo Código Fonte)
+### 1. Baixar o app pronto
 
-Se você quer compilar e rodar o aplicativo Desktop você mesmo, garanta que você tem o **.NET 9 SDK** instalado.
+Se você quer apenas usar o aplicativo:
+
+1. entre na página de [Releases](https://github.com/GabrielSantos23/projects-dashboard/releases).
+2. Baixe o arquivo `ProjectDashboard_Setup.exe`.
+3. Execute o arquivo `.exe`.
+
+O aplicativo é autossuficiente. Não é necessário instalar o .NET para usar ele. Ele também atualiza automaticamente quando novas versões são lançadas.
+
+---
+
+### 2. Compilar o App Desktop pelo código-fonte
+
+Se você prefere compilar o projeto manualmente, é necessário ter o **.NET 9 SDK** instalado.
 
 ```bash
-# Clone o repositório e vá para a pasta
 git clone https://github.com/GabrielSantos23/projects-dashboard.git
 cd projects-dashboard
 
-# Rode o projeto Desktop (Avalonia)
 dotnet run --project Src/DesktopAvalonia/ProjectDashboard.Avalonia.csproj
 ```
 
-### 3. Rodar a Versão Web (Ruby on Rails)
+---
 
-Se você prefere a interface no navegador, a versão Ruby on Rails 8 está disponível. Certifique-se de que tem o **Ruby** instalado.
+### 3. Rodar a versão Web (Ruby on Rails)
+
+A versão Web foi feita com Ruby on Rails 9. É preciso ter o **Ruby**.
 
 ```bash
-# Navegue até a pasta do painel web
 cd Src/WebRails
 
-# Instale as dependências (somente na primeira vez)
 bundle install
 ruby bin/rails db:prepare
 
-# Inicie o servidor local
 ruby bin/rails server
 ```
 
-O Dashboard Web ficará disponível em `http://localhost:3000`.
+Depois disso, o painel estará disponível em:
+
+```
+http://localhost:3000
+```
 
 ---
 
-## 💡 Como usar
+## Como usar
 
-1. Logo que abrir o app, a sua lista de projetos estará vazia. Clique no botão **Scan Projects**.
-2. Na seção de pastas, clique em **Browse** (no Desktop) para selecionar a pasta raiz onde ficam seus repositórios (ex: `C:\Users\gabs\Documentos\GitHub`).
-3. Clique em **Add Folder**, depois em **Start Scan**.
-4. O app vai varrer todas as pastas buscando projetos com Git, ignorando pastas pesadas (como `node_modules` ou `bin`) para ser bem rápido.
-5. Pronto! Agora você pode explorar seus projetos no dashboard.
-6. Clique em qualquer card de projeto para abrir o **Menu de Detalhes**, onde você pode gerenciar tags customizadas, aplicar Tags do Git, ou até mesmo fazer o _stage_ e criar _commits_ de código diretamente.
-7. Seu banco de dados fica salvo de forma segura e local na sua máquina.
-8. Use o botão **Refresh** nas páginas para escanear instantaneamente as pastas de novo e atualizar a lista com os últimos commits e novos projetos.
+1. Ao abrir o aplicativo pela primeira vez, a lista de projetos estará vazia, clique em **Scan Projects**.
+2. Selecione a pasta raiz onde ficam seus repositórios.
+3. Clique em **Add Folder** e depois em **Start Scan**.
+4. O app vai procurar por projetos Git, ignorando pastas pesadas como `node_modules` ou `bin` para manter o desempenho.
+5. Após o scan, os projetos aparecerão no app.
+6. Clique em qualquer projeto para abrir a página de detalhes, você pode adicionar tags, visualizar informações do Git e realizar commit.
+7. O banco de dados é salvo localmente.
+8. Use o botão **Refresh** para atualizar as informações e buscar novos commits ou projetos adicionados recentemente.
 
 ---
 
-## 🤝 Quer contribuir?
+## Contribuições
 
-Sinta-se livre para abrir _issues_ se o scanner travar em alguma pasta ou enviar um _pull request_ melhorando a lógica de detecção de tecnologias. Toda ajuda é super bem-vinda!
+Se encontrar algum problema (por exemplo, o scanner travando em alguma pasta), fique à vontade para abrir uma issue.
+Pull requests com melhorias na detecção de tecnologias ou na interface também são bem-vindos.
