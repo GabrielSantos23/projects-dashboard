@@ -335,6 +335,32 @@ public class ProjectDetailViewModel : ViewModelBase
 
                 repo.Commit(CommitMessage, signature, signature);
             });
+
+            // Push to origin
+            await Task.Run(() =>
+            {
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = "git",
+                    Arguments = "push origin HEAD",
+                    WorkingDirectory = Project.Path,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(processInfo);
+                if (process != null)
+                {
+                    process.WaitForExit();
+                    if (process.ExitCode != 0)
+                    {
+                        var error = process.StandardError.ReadToEnd();
+                        throw new Exception($"Failed to push: {error}");
+                    }
+                }
+            });
             
             ShowCommitModal = false;
             await RescanProject();
@@ -357,7 +383,7 @@ public class ProjectDetailViewModel : ViewModelBase
         ShowGitTagModal = true;
     }
 
-    public void CreateGitTag()
+    public async Task CreateGitTag()
     {
         if (Project == null || string.IsNullOrWhiteSpace(GitTagName)) return;
         
@@ -383,6 +409,32 @@ public class ProjectDetailViewModel : ViewModelBase
             {
                 repo.ApplyTag(GitTagName, repo.Head.Tip.Sha, signature, GitTagMessage);
             }
+            
+            // Push tag to origin
+            await Task.Run(() =>
+            {
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = "git",
+                    Arguments = $"push origin {GitTagName}",
+                    WorkingDirectory = Project.Path,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(processInfo);
+                if (process != null)
+                {
+                    process.WaitForExit();
+                    if (process.ExitCode != 0)
+                    {
+                        var error = process.StandardError.ReadToEnd();
+                        throw new Exception($"Failed to push tag: {error}");
+                    }
+                }
+            });
             
             ShowGitTagModal = false;
         }
